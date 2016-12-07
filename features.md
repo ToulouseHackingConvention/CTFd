@@ -74,7 +74,7 @@ L'interface organisateur devrait proposer les fonctionnalités suivantes:
 - [ ] Ajout/suppression des indices: Permet d'ajouter/supprimer des incides, permet d'indiquer le challenge concerné
 - [x] Possibilité d'ajouter/enlever des points aux équipes: avec tracabilité
 - [x] Possibilité de désactiver un challenge
-- [ ] Possibilité de modifier la description d'un challenge
+- [x] Possibilité de modifier la description d'un challenge
 - [ ] Possibilité de masquer le scoreboard(classement) aux joueurs
 - [ ] Visualisation des notes/feedback des joueurs sur les challenges
 - [ ] Monitoring de l'état des challenges (dans la mesure du possible): utiliser le script de résolution/monitoring fourni par les auteurs
