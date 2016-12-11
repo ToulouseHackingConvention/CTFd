@@ -48,7 +48,7 @@ function updateChalWindow(obj) {
     });
 
     if (obj.hints) {
-        $('#hints-value').html(obj.hints);
+        $('#hints-value').html(parsehints(obj.hints));
         $('#tab-hints').removeClass('hidden');
     } else {
         $('#hints-value').html('');

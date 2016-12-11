@@ -368,4 +368,22 @@ table{
     margin: 0px;
 }
 
+#tab-hints a:after {
+    content:"!";
+    background: #ff3f3f;
+    border-radius: 50px;
+    color: #FFFFFF;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width :18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+#tab-hints.hidden a:after {
+  display: none;
+}
+
 /* END OF INPUT CSS */

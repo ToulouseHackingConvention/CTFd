@@ -53,3 +53,10 @@ function colorhash (x) {
 function htmlentities(string) {
     return $('<div/>').text(string).html();
 }
+
+function parsehints(txt) {
+    txt = txt.replace(/[\n]/g, '<br>');
+    return txt.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, function(url) {
+        return '<a target="_blank" href="'+url+'">'+url+'</a>'
+      });
+}
