@@ -180,6 +180,7 @@ function loadchals(){
             loadkeys(this.value);
             loadtags(this.value);
             loadfiles(this.value);
+            loadhints(this.value);
         });
 
         $('.create-challenge').click(function (e) {
@@ -189,6 +190,34 @@ function loadchals(){
         });
 
     });
+}
+
+function updatehints() {
+    var hints = $('#hints-chal-ta').val();
+    var chal  = $('.chal-id').val();
+    var nonce = $('[name=nonce]').val();
+    var ajaxConfig = {
+      method: 'POST',
+      url: script_root + '/admin/hints/'+chal+'/update',
+      data: {nonce:nonce, value: hints}
+    };
+    $.ajax(ajaxConfig);
+    $('#update-hints').modal('hide');
+}
+
+function loadhints(chal) {
+    var nonce = $('[name=nonce]').val();
+    var ajaxConfig = {
+      method:'GET',
+      url: script_root + '/admin/hints/'+chal,
+      dataType: 'json',
+      success: function(json, status, jqXhr) {
+        if (json && json.value) {
+          $('#hints-chal-ta').val(json.value);
+        }
+      }
+    };
+    $.ajax(ajaxConfig);
 }
 
 $('#submit-key').click(function (e) {
@@ -203,6 +232,11 @@ $('#submit-keys').click(function (e) {
 $('#submit-tags').click(function (e) {
     e.preventDefault();
     updatetags()
+});
+
+$('#submit-hints').click(function(e) {
+    e.preventDefault();
+    updatehints();
 });
 
 $('#delete-chal form').submit(function(e){

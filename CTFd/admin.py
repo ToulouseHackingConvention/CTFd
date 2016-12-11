@@ -868,3 +868,20 @@ def admin_update_chal():
     db.session.commit()
     db.session.close()
     return redirect(url_for('admin.admin_chals'))
+
+@admin.route('/admin/hints/<chalid>', methods=['GET'])
+@admins_only
+def load_hints(chalid):
+    challenge = Challenges.query.filter_by(id=chalid).first()
+    return jsonify({'value':challenge.hints})
+
+@admin.route('/admin/hints/<chalid>/update', methods=['POST'])
+@admins_only
+def update_hints(chalid):
+    challenge = Challenges.query.filter_by(id=chalid).first()
+    challenge.hints = request.form['value'][0:512]
+    db.session.add(challenge)
+    db.session.commit()
+    db.session.close()
+    return "1"
+
