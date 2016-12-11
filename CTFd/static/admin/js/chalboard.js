@@ -152,6 +152,35 @@ function deletefile(chal, file, elem){
     });
 }
 
+function updatehints() {
+    var hints = $('#hints-chal-ta').val();
+    var chal  = $('.chal-id').val();
+    var nonce = $('[name=nonce]').val();
+    var ajaxConfig = {
+      method: 'POST',
+      url: script_root + '/admin/hints/'+chal+'/update',
+      data: {nonce:nonce, value: hints}
+    };
+    $.ajax(ajaxConfig);
+    $('#update-hints').modal('hide');
+}
+
+function loadhints(chal) {
+    var nonce = $('[name=nonce]').val();
+    var ajaxConfig = {
+        method:'GET',
+        url: script_root + '/admin/hints/'+chal,
+        dataType: 'json',
+        success: function(json, status, jqXhr) {
+            if (json && json.value) {
+                $('#hints-chal-ta').val(json.value);
+            } else {
+                $('#hints-chal-ta').val('');
+            }
+        }
+    };
+    $.ajax(ajaxConfig);
+}
 
 function loadchals(){
     $('#challenges').empty();
@@ -192,33 +221,6 @@ function loadchals(){
     });
 }
 
-function updatehints() {
-    var hints = $('#hints-chal-ta').val();
-    var chal  = $('.chal-id').val();
-    var nonce = $('[name=nonce]').val();
-    var ajaxConfig = {
-      method: 'POST',
-      url: script_root + '/admin/hints/'+chal+'/update',
-      data: {nonce:nonce, value: hints}
-    };
-    $.ajax(ajaxConfig);
-    $('#update-hints').modal('hide');
-}
-
-function loadhints(chal) {
-    var nonce = $('[name=nonce]').val();
-    var ajaxConfig = {
-      method:'GET',
-      url: script_root + '/admin/hints/'+chal,
-      dataType: 'json',
-      success: function(json, status, jqXhr) {
-        if (json && json.value) {
-          $('#hints-chal-ta').val(json.value);
-        }
-      }
-    };
-    $.ajax(ajaxConfig);
-}
 
 $('#submit-key').click(function (e) {
     submitkey($('#chalid').val(), $('#answer').val())

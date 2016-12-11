@@ -46,6 +46,14 @@ function updateChalWindow(obj) {
     $('pre code').each(function(i, block) {
         hljs.highlightBlock(block);
     });
+
+    if (obj.hints) {
+        $('#hints-value').html(obj.hints);
+        $('#tab-hints').removeClass('hidden');
+    } else {
+        $('#hints-value').html('');
+        $('#tab-hints').addClass('hidden');
+    }
 }
 
 $("#answer-input").keyup(function(event){
