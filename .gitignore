@@ -62,3 +62,7 @@ CTFd/static/uploads
 CTFd/uploads
 CTFd/plugins
 .ctfd_secret_key
+
+# vim
+.*.swp
+*.swp
