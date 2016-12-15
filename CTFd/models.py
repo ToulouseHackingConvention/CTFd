@@ -246,21 +246,17 @@ class Config(db.Model):
         self.value = value
 
 
-class Feedbacks(db.Model):
+class Notepads(db.Model):
   id        = db.Column(db.Integer, primary_key=True)
   teamid    = db.Column(db.Integer, db.ForeignKey('teams.id'))
   chalid    = db.Column(db.Integer, db.ForeignKey('challenges.id'))
-  feedback  = db.Column(db.Text)
-  note      = db.Column(db.Integer)
+  content   = db.Column(db.Text)
 
-  def __init__(self, teamid, chalid, feedback, note):
-    if note < 0 or note > 5:
-      raise Exception('Invalid note')
+  def __init__(self, teamid, chalid, content):
     self.teamid     = teamid
-    self.feedback = feedback
-    self.note     = note
-    self.chalid   = chalid
+    self.chalid     = chalid
+    self.content    = content
 
   def __repr__(self):
-    return "<note %i>" % self.note
+    return "content:"+content
 
