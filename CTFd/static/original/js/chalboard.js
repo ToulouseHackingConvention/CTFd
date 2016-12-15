@@ -46,7 +46,9 @@ function updateChalWindow(obj) {
     $('pre code').each(function(i, block) {
         hljs.highlightBlock(block);
     });
-
+    
+    $('#feedback-note').val(obj.feedbacks.note);
+    $('#feedback-feedback').val(obj.feedbacks.feedback);
     if (obj.hints) {
         $('#hints-value').html(parsehints(obj.hints));
         $('#tab-hints').removeClass('hidden');
@@ -247,6 +249,45 @@ $('#chal-window').on('hide.bs.modal', function (event) {
     $("#correct-key").slideUp();
     $("#already-solved").slideUp();
     $("#too-fast").slideUp();
+});
+
+function updateFeedback(e) {
+    var note      = $('#feedback-note').val();
+    var feedback  = $('#feedback-feedback').val();
+    var chalid    = $('#chal-id').val();
+    var nonce     = $('[name=nonce]').val();
+    var config    = {
+        url: script_root + '/chal/'+chalid+'/feedback',
+        method: 'POST',
+        dataType: 'json',
+        data: {note:note, feedback: feedback, nonce:nonce},
+        success: function(json) {
+          if (!json.error) {
+              $('#feedback-submit').html('Saved!');
+              $('#feedback-submit').removeClass('btn-default');
+              $('#feedback-submit').addClass('btn-success');
+              window.setTimeout(function() {
+                  $('#feedback-submit').html('Save');
+                  $('#feedback-submit').removeClass('btn-success');
+                  $('#feedback-submit').addClass('btn-default');
+              }, 500);
+          } else {
+              $('#feedback-submit').html('Error');
+              $('#feedback-submit').removeClass('btn-default');
+              $('#feedback-submit').addClass('btn-danger');
+              window.setTimeout(function() {
+                  $('#feedback-submit').html('Save');
+                  $('#feedback-submit').removeClass('btn-danger');
+                  $('#feedback-submit').addClass('btn-default');
+              }, 500);
+          }
+        }
+    };
+    $.ajax(config);
+}
+
+window.addEventListener('load', function() {
+  document.getElementById('feedback-submit').addEventListener('click', updateFeedback);
 });
 
 // $.distint(array)

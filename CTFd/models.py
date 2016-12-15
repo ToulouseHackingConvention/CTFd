@@ -255,7 +255,7 @@ class Feedbacks(db.Model):
   def __init__(self, teamid, chalid, feedback, note):
     if note < 0 or note > 5:
       raise Exception('Invalid note')
-    self.team     = team
+    self.teamid     = teamid
     self.feedback = feedback
     self.note     = note
     self.chalid   = chalid
