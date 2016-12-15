@@ -108,6 +108,7 @@
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#challenge" aria-controls="challenge" role="tab">Challenge</a></li>
                 <li role="presentation"><a href="#solves" aria-controls="solves" class="chal-solves" role="tab"></a></li>
+                <li role="presentation"><a href="#feedback" aria-controls="feedback" class="chal-feedback" role="tab">Team notepad</a></li>
             </ul>
             <div class="modal-body">
                 <div role="tabpanel">
@@ -151,6 +152,11 @@
                                 <tbody id="chal-solves-names">
                                 </tbody>
                             </table>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="feedback">
+                          <div class="alert alert-info show">You can write down notes here. Only members of your team can read them.</div>
+                          <textarea id="feedback-feedback" class="form-control"></textarea><br>
+                          <button id="feedback-submit" type="button" class="btn btn-default">Save</button>
                         </div>
                     </div>
                 </div>
