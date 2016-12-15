@@ -47,8 +47,8 @@ function updateChalWindow(obj) {
         hljs.highlightBlock(block);
     });
     
-    $('#feedback-note').val(obj.feedbacks.note);
-    $('#feedback-feedback').val(obj.feedbacks.feedback);
+    $('#notepad-content').val(obj.notepad);
+    
     if (obj.hints) {
         $('#hints-value').html(parsehints(obj.hints));
         $('#tab-hints').removeClass('hidden');
@@ -251,34 +251,33 @@ $('#chal-window').on('hide.bs.modal', function (event) {
     $("#too-fast").slideUp();
 });
 
-function updateFeedback(e) {
-    var note      = $('#feedback-note').val();
-    var feedback  = $('#feedback-feedback').val();
+function updatenotepad(e) {
+    var content   = $('#notepad-content').val();
     var chalid    = $('#chal-id').val();
     var nonce     = $('[name=nonce]').val();
     var config    = {
-        url: script_root + '/chal/'+chalid+'/feedback',
+        url: script_root + '/chal/'+chalid+'/notepad',
         method: 'POST',
         dataType: 'json',
-        data: {note:note, feedback: feedback, nonce:nonce},
+        data: {content:content, nonce:nonce},
         success: function(json) {
           if (!json.error) {
-              $('#feedback-submit').html('Saved!');
-              $('#feedback-submit').removeClass('btn-default');
-              $('#feedback-submit').addClass('btn-success');
+              $('#notepad-submit').html('Saved!');
+              $('#notepad-submit').removeClass('btn-default');
+              $('#notepad-submit').addClass('btn-success');
               window.setTimeout(function() {
-                  $('#feedback-submit').html('Save');
-                  $('#feedback-submit').removeClass('btn-success');
-                  $('#feedback-submit').addClass('btn-default');
+                  $('#notepad-submit').html('Save');
+                  $('#notepad-submit').removeClass('btn-success');
+                  $('#notepad-submit').addClass('btn-default');
               }, 500);
           } else {
-              $('#feedback-submit').html('Error');
-              $('#feedback-submit').removeClass('btn-default');
-              $('#feedback-submit').addClass('btn-danger');
+              $('#notepad-submit').html('Error');
+              $('#notepad-submit').removeClass('btn-default');
+              $('#notepad-submit').addClass('btn-danger');
               window.setTimeout(function() {
-                  $('#feedback-submit').html('Save');
-                  $('#feedback-submit').removeClass('btn-danger');
-                  $('#feedback-submit').addClass('btn-default');
+                  $('#notepad-submit').html('Save');
+                  $('#notepad-submit').removeClass('btn-danger');
+                  $('#notepad-submit').addClass('btn-default');
               }, 500);
           }
         }
@@ -287,7 +286,7 @@ function updateFeedback(e) {
 }
 
 window.addEventListener('load', function() {
-  document.getElementById('feedback-submit').addEventListener('click', updateFeedback);
+  document.getElementById('notepad-submit').addEventListener('click', updatenotepad);
 });
 
 // $.distint(array)

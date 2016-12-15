@@ -26,7 +26,7 @@ def create_app(config='CTFd.config'):
         app.config.from_object(config)
         app.jinja_loader = ThemeLoader(os.path.join(app.root_path, app.template_folder), followlinks=True)
 
-        from CTFd.models import db, Teams, Solves, Challenges, WrongKeys, Keys, Tags, Files, Tracking
+        from CTFd.models import db, Teams, Solves, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Notepads
 
         url = make_url(app.config['SQLALCHEMY_DATABASE_URI'])
         if url.drivername == 'postgres':
