@@ -1,7 +1,7 @@
 from flask import current_app as app, render_template, request, redirect, abort, jsonify, json as json_mod, url_for, session, Blueprint
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name
-from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Keys, Tags, Teams, Awards
+from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Keys, Tags, Teams, Awards, Feedbacks
 
 from sqlalchemy.sql import and_, or_, not_
 
@@ -51,12 +51,17 @@ def chals():
                 return redirect(url_for('views.static_html'))
     if user_can_view_challenges() and (ctf_started() or is_admin()):
         chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).add_columns('id', 'name', 'value', 'description', 'category', 'hints').order_by(Challenges.value).all()
-
+        feedbacks = Feedbacks.query.filter_by(teamid=session['id']).add_columns('note', 'feedback')
         json = {'game':[]}
         for x in chals:
+            feedback = feedbacks.filter_by(chalid=x.id).add_columns('feedback', 'note').all()
+            if len(feedback) == 0:
+                feedback = {"note":0, "feedback":None}
+            else:
+                feedback = {"note":feedback[0].note, "feedback":feedback[0].feedback}
             tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x[1]).all()]
             files = [ str(f.location) for f in Files.query.filter_by(chal=x.id).all() ]
-            json['game'].append({'id':x[1], 'name':x[2], 'value':x[3], 'description':x[4], 'category':x[5], 'files':files, 'tags':tags, 'hints':x[6]})
+            json['game'].append({'id':x[1], 'name':x[2], 'value':x[3], 'description':x[4], 'category':x[5], 'files':files, 'tags':tags, 'hints':x[6], 'feedbacks':feedback})
 
         db.session.close()
         return jsonify(json)
@@ -240,3 +245,30 @@ def chal(chalid):
             return jsonify({'status': '2', 'message': 'You already solved this'})
     else:
         return "-1"
+
+
+@challenges.route('/chal/<chalid>/feedback', methods=['POST'])
+def update_feedback(chalid):
+  if not authed() or not is_verified():
+      return jsonify({'error':True})
+
+  teamid    = session['id']
+  f         = request.form['feedback'][0:1024]
+  """note      = request.form['note']
+  if not re.match('^[0-5]$', note):
+      return jsonify({'error':True, 'errstr':'Invalid mark.'});
+  note = int(note)"""
+  note = 0
+  feedback  = Feedbacks.query.filter_by(chalid=chalid, teamid=teamid).all()
+  if len(feedback) == 0:
+      feedback = Feedbacks(teamid, chalid, f, note)
+      db.session.add(feedback)
+      db.session.commit()
+      db.session.close()
+  else:
+      feedback[0].feedback  = f;
+      feedback[0].note      = note;
+      db.session.add(feedback[0]);
+      db.session.commit();
+      db.session.close();
+  return jsonify({'error':False});
