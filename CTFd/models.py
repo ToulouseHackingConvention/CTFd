@@ -244,3 +244,23 @@ class Config(db.Model):
     def __init__(self, key, value):
         self.key = key
         self.value = value
+
+
+class Feedbacks(db.Model):
+  id        = db.Column(db.Integer, primary_key=True)
+  teamid    = db.Column(db.Integer, db.ForeignKey('teams.id'))
+  chalid    = db.Column(db.Integer, db.ForeignKey('challenges.id'))
+  feedback  = db.Column(db.Text)
+  note      = db.Column(db.Integer)
+
+  def __init__(self, teamid, chalid, feedback, note):
+    if note < 0 or note > 5:
+      raise Exception('Invalid note')
+    self.team     = team
+    self.feedback = feedback
+    self.note     = note
+    self.chalid   = chalid
+
+  def __repr__(self):
+    return "<note %i>" % self.note
+
