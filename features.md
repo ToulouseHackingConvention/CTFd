@@ -3,13 +3,13 @@
 vim: set spell spelllang=fr:
 
 ## Spécifications pour la plateforme web
-- [ ] La plateforme web devra comprendre deux interfaces distinctes:
-  - [ ] Interface joueur
-  - [ ] Interface organisateur
+- [x] La plateforme web devra comprendre deux interfaces distinctes:
+  - [x] Interface joueur
+  - [x] Interface organisateur
 - [ ] L'interface devra être testée sur plusieurs navigateurs
   - [ ] Sur Chrome et Firefox l'interface devra être conforme aux attentes de design
   - [ ] Sur les autres navigateurs seul le côté fonctionnel sera nécessaire
-- [ ] L'interface joueur devra être suffisamment modulaire pour permettre à une une autre team de modifier le design.
+- [ ] L'interface joueur devra être suffisamment modulaire pour permettre à une autre team de modifier le design.
 
 ## Interface joueur
 L'interface joueur proposera les fonctionnalités suivantes :
