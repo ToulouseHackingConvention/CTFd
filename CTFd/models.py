@@ -246,16 +246,16 @@ class Config(db.Model):
 
 
 class Notepads(db.Model):
-  id        = db.Column(db.Integer, primary_key=True)
-  teamid    = db.Column(db.Integer, db.ForeignKey('teams.id'))
-  chalid    = db.Column(db.Integer, db.ForeignKey('challenges.id'))
-  content   = db.Column(db.Text)
+  id = db.Column(db.Integer, primary_key=True)
+  teamid = db.Column(db.Integer, db.ForeignKey('teams.id'))
+  chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
+  content = db.Column(db.Text)
 
   def __init__(self, teamid, chalid, content):
-    self.teamid     = teamid
-    self.chalid     = chalid
-    self.content    = content
+    self.teamid = teamid
+    self.chalid = chalid
+    self.content = content
 
   def __repr__(self):
-    return "content:"+content
+    return "<Notepads %r>" % self.content
 
