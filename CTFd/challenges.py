@@ -56,9 +56,9 @@ def chals():
         for x in chals:
             notepad = notepads.filter_by(chalid=x.id).add_columns('content').first()
             if notepad is None:
-                notepad  = ""
+                notepad = ""
             else:
-                notepad  = notepad.content
+                notepad = notepad.content
             tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x[1]).all()]
             files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
             json['game'].append({'id': x[1], 'name': x[2], 'value': x[3], 'description': x[4], 'category': x[5], 'files': files, 'tags': tags, 'notepad': notepad})
@@ -248,17 +248,17 @@ def chal(chalid):
 @challenges.route('/chal/<chalid>/notepad', methods=['POST'])
 def update_notepad(chalid):
   if not authed() or not is_verified():
-      return jsonify({'error':True})
+      return jsonify({'error': True})
 
-  teamid    = session['id']
-  content   = request.form['content'][0:4096]
-  notepad   = Notepads.query.filter_by(chalid=chalid, teamid=teamid).first()
+  teamid = session['id']
+  content = request.form['content'][:4096]
+  notepad = Notepads.query.filter_by(chalid=chalid, teamid=teamid).first()
   if notepad is None:
       notepad = Notepads(teamid, chalid, content)
   else:
       notepad.content = content
 
-  db.session.add(notepad);
-  db.session.commit();
-  db.session.close();
-  return jsonify({'error':False});
+  db.session.add(notepad)
+  db.session.commit()
+  db.session.close()
+  return jsonify({'error': False})
