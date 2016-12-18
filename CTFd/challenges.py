@@ -92,9 +92,11 @@ def solves(teamid=None):
             solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id'], Teams.banned == False).all()
         else:
             return redirect(url_for('auth.login', next='solves'))
-    else:
+    elif get_config('view_team_solves') or is_admin() or teamid == session['id']:
         solves = Solves.query.filter_by(teamid=teamid).all()
         awards = Awards.query.filter_by(teamid=teamid).all()
+    else:
+        return "denied" # TODO: return a real error
     db.session.close()
     json = {'solves':[]}
     for solve in solves:

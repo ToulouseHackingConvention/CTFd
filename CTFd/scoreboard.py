@@ -1,5 +1,5 @@
 from flask import current_app as app, session, render_template, jsonify, Blueprint, redirect, url_for, request
-from CTFd.utils import unix_time, authed, get_config
+from CTFd.utils import unix_time, authed, get_config, is_admin
 from CTFd.models import db, Teams, Solves, Awards, Challenges
 from sqlalchemy.sql.expression import union_all
 
@@ -54,6 +54,8 @@ def scores():
 def topteams(count):
     if get_config('view_scoreboard_if_authed') and not authed():
         return redirect(url_for('auth.login', next=request.path))
+    if not get_config('view_team_solves') and not is_admin():
+        return "denied" # TODO: return a real error
     try:
         count = int(count)
     except:

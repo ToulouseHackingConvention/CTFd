@@ -80,6 +80,14 @@
 
                     <div class="checkbox">
                         <label>
+                            <input id="view_team_solves" name="view_team_solves" type="checkbox"
+                                   {% if view_team_solves %}checked{% endif %}>
+                            Users can see the details of what challenges other teams solved
+                        </label>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
                             <input id="prevent_registration" name="prevent_registration" type="checkbox" {% if prevent_registration %}checked{% endif %}>
                             Prevent public registration
                         </label>

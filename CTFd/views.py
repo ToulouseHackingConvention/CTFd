@@ -141,8 +141,12 @@ def team(teamid):
     if get_config('view_scoreboard_if_authed') and not authed():
         return redirect(url_for('auth.login', next=request.path))
     user = Teams.query.filter_by(id=teamid).first_or_404()
-    solves = Solves.query.filter_by(teamid=teamid)
-    awards = Awards.query.filter_by(teamid=teamid).all()
+    if get_config('view_team_solves') or is_admin() or teamid == session['id']:
+        solves = Solves.query.filter_by(teamid=teamid)
+        awards = Awards.query.filter_by(teamid=teamid).all()
+    else:
+        solves = []
+        awards = []
     score = user.score()
     place = user.place()
     db.session.close()

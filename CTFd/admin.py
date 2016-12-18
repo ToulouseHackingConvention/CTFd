@@ -53,6 +53,7 @@ def admin_config():
         try:
             view_challenges_unregistered = bool(request.form.get('view_challenges_unregistered', None))
             view_scoreboard_if_authed = bool(request.form.get('view_scoreboard_if_authed', None))
+            view_team_solves = bool(request.form.get('view_team_solves', None))
             prevent_registration = bool(request.form.get('prevent_registration', None))
             prevent_name_change = bool(request.form.get('prevent_name_change', None))
             view_after_ctf = bool(request.form.get('view_after_ctf', None))
@@ -62,6 +63,7 @@ def admin_config():
         except (ValueError, TypeError):
             view_challenges_unregistered = None
             view_scoreboard_if_authed = None
+            view_team_solves = None
             prevent_registration = None
             prevent_name_change = None
             view_after_ctf = None
@@ -71,6 +73,7 @@ def admin_config():
         finally:
             view_challenges_unregistered = set_config('view_challenges_unregistered', view_challenges_unregistered)
             view_scoreboard_if_authed = set_config('view_scoreboard_if_authed', view_scoreboard_if_authed)
+            view_team_solves = set_config('view_team_solves', view_team_solves)
             prevent_registration = set_config('prevent_registration', prevent_registration)
             prevent_name_change = set_config('prevent_name_change', prevent_name_change)
             view_after_ctf = set_config('view_after_ctf', view_after_ctf)
@@ -135,6 +138,7 @@ def admin_config():
 
     view_challenges_unregistered = get_config('view_challenges_unregistered')
     view_scoreboard_if_authed = get_config('view_scoreboard_if_authed')
+    view_team_solves = get_config('view_team_solves')
     prevent_registration = get_config('prevent_registration')
     prevent_name_change = get_config('prevent_name_change')
     verify_emails = get_config('verify_emails')
@@ -159,6 +163,7 @@ def admin_config():
                            mail_ssl=mail_ssl,
                            view_challenges_unregistered=view_challenges_unregistered,
                            view_scoreboard_if_authed=view_scoreboard_if_authed,
+                           view_view_team_solves=view_team_solves,
                            prevent_registration=prevent_registration,
                            mailfrom_addr=mailfrom_addr,
                            mg_base_url=mg_base_url,
