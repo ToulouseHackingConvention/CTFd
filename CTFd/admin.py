@@ -265,7 +265,7 @@ def delete_container(container_id):
 @admins_only
 def new_container():
     name = request.form.get('name')
-    if set(name) <= set('abcdefghijklmnopqrstuvwxyz0123456789-_'):
+    if not set(name) <= set('abcdefghijklmnopqrstuvwxyz0123456789-_'):
         return redirect(url_for('admin.list_container'))
     buildfile = request.form.get('buildfile')
     files = request.files.getlist('files[]')
