@@ -9,7 +9,7 @@ vim: set spell spelllang=fr:
 - [ ] L'interface devra être testée sur plusieurs navigateurs
   - [ ] Sur Chrome et Firefox l'interface devra être conforme aux attentes de design
   - [ ] Sur les autres navigateurs seul le côté fonctionnel sera nécessaire
-- [ ] L'interface joueur devra être suffisamment modulaire pour permettre à une autre team de modifier le design.
+- [X] L'interface joueur devra être suffisamment modulaire pour permettre à une autre team de modifier le design.
 
 ## Interface joueur
 L'interface joueur proposera les fonctionnalités suivantes :
@@ -41,15 +41,15 @@ L'interface joueur proposera les fonctionnalités suivantes :
 
 ### Soumission des flags - Accès authentifié seulement
 - [ ] Un champ unique de saisie sera proposé, sur une page dédiée
-- [x] Le format de flag autorisé devra être THCon{[a-zA-Z0-9_]+}
+- [x] Le format de flag autorisé devra être THCon{[a-zA-Z0-9\_]+}
 - [x] La valeur de ce champ sera strippé des espaces à gauche et à droite.
 - [x] La valeur de ce champ sera lower-casé.
-- [ ] La taille minimale du flag devra être de 20 caractères, et la taille maximale de 512 caractères.
+- [X] La taille minimale du flag devra être de 20 caractères, et la taille maximale de 512 caractères.
 - [ ] Le flag sera stocké sous forme de hash (ex: PBKDF2) et la soumission sera donc hashé puis comparé avec les valeurs en base de données.
 - [x] La soumission de flags devra être limité à 1 soumission par seconde par équipe.
 - [x] Un grand soin devra être apporté au code implémentant la logique de vérification du flag, afin d'éviter les races conditions et la soumission multiple (des contraintes peuvent être directement intégrés dans la base de données pour garantir au maximum la cohérence des données.)
 - [ ] Le scoring de la résolution d'un challenge devra suivre la logique suivante:
-  - [ ] (points fixe) + (points dynamiques) * Max(0, (K - nombre de solv) / K), avec typiquement (fixe = 100,200,500), (dynamique = 100,200,300), et (K = 5, 10, 15)
+  - [ ] (points fixe) + (points dynamiques) (dynamique = +3,+2,+1,+0, pour les breakthrough)
   - [x] Les points scorés une fois ne bougent pas, on ne perd pas de points au cours du temps.
 
 ### Classement - Accès authentifié seulement
@@ -67,12 +67,12 @@ L'interface joueur proposera les fonctionnalités suivantes :
 
 L'interface organisateur devrait proposer les fonctionnalités suivantes:
 - [x] Ajout/suppresion d'un flag/challenge: Permet d'ajouter/supprimer un flag d'un challenge de l'ensemble des flags valides, permet de préciser le nombre de points de base offert par le challenge + le nombre de points dynamiques et K
-- [ ] Monitoring des soumissions de flags: heure, IP source, nom de l'équipe d'origine (sanitisé), valeur flag (sanitisée)
-  - [ ] Si la valeur du flag soumise n'a pas matché avec le hash d'un flag existant, l'indiquer en clair (afin de pouvoir guider des participants s'il y a un souci avec un challenge)
-  - [ ] Si la valeur du flag soumise a matché avec le hash d'un flag existant, indiquer à quel challenge cela correspond.
+- [X] Monitoring des soumissions de flags: heure, IP source, nom de l'équipe d'origine (sanitisé), valeur flag (sanitisée)
+  - [X] Si la valeur du flag soumise n'a pas matché avec le hash d'un flag existant, l'indiquer en clair (afin de pouvoir guider des participants s'il y a un souci avec un challenge)
+  - [X] Si la valeur du flag soumise a matché avec le hash d'un flag existant, indiquer à quel challenge cela correspond.
 
-- [ ] Ajout/suppression des indices: Permet d'ajouter/supprimer des incides, permet d'indiquer le challenge concerné
-- [x] Possibilité d'ajouter/enlever des points aux équipes: avec tracabilité
+- [ ] Ajout/suppression des indices: Permet d'ajouter/supprimer des indices, permet d'indiquer le challenge concerné
+- [x] Possibilité d'ajouter/enlever des points aux équipes: avec traçabilité
 - [x] Possibilité de désactiver un challenge
 - [x] Possibilité de modifier la description d'un challenge
 - [ ] Possibilité de masquer le scoreboard(classement) aux joueurs
@@ -83,6 +83,5 @@ L'interface organisateur devrait proposer les fonctionnalités suivantes:
 
 # Hébergement et déploiement
 
-- [ ] Afin de garantir une tracabilité, l'infrastructure devra être architecturée de manière à pouvoir identifier de quelle équipe proviennent les requêtes (ex: VLAN et sous-réseau par équipe)
+- [ ] Afin de garantir une traçabilité, l'infrastructure devra être architecturée de manière à pouvoir identifier de quelle équipe proviennent les requêtes (ex: VLAN et sous-réseau par équipe)
 - [ ] Les 2 interfaces seront proposées uniquement à travers HTTPS sur IPv4, avec un certificat valide.
-
