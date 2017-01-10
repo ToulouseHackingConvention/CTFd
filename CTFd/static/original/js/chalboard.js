@@ -56,6 +56,18 @@ function updateChalWindow(obj) {
         $('#hints-value').html('');
         $('#tab-hints').addClass('hidden');
     }
+    if (obj.is_solved) {
+      $('#set_mark')[0].className = "show";
+      $("#rateYo").rateYo("option", "onSet", null);
+      if (obj.mark) {
+        $("#rateYo").rateYo("option", "rating", obj.mark);
+      } else {
+        $("#rateYo").rateYo("option", "rating", 3);
+      }
+      $("#rateYo").rateYo("option", "onSet", rate_chal);
+    } else {
+      $('#set_mark')[0].className = "hidden";
+    }
 }
 
 $("#answer-input").keyup(function(event){
@@ -134,6 +146,12 @@ function marksolves(cb) {
         var solves = $.parseJSON(JSON.stringify(data));
         for (var i = solves['solves'].length - 1; i >= 0; i--) {
             var id = solves['solves'][i].chalid;
+            var obj = $.grep(challenges['game'], function (e) {
+                return e.id == id;
+            })[0];
+
+            obj.is_solved = true;
+            obj.mark      = solves['solves'][i].mark;
             $('button[value="' + id + '"]').removeClass('theme-background');
             $('button[value="' + id + '"]').addClass('solved-challenge');
         };
@@ -182,7 +200,8 @@ function loadchals() {
         $('#challenges-board').html("");
 
         for (var i = challenges['game'].length - 1; i >= 0; i--) {
-            challenges['game'][i].solves = 0
+            challenges['game'][i].solves = 0;
+            challenges['game'][i].is_solved = false;
             if ($.inArray(challenges['game'][i].category, categories) == -1) {
                 var category = challenges['game'][i].category;
                 categories.push(category);
@@ -328,5 +347,40 @@ $('#chal-window').on('hidden.bs.modal', function() {
     $('.nav-tabs a:first').tab('show');
     history.replaceState('', document.title, window.location.pathname);
 });
+
+
+function rate_chal(rating, instance) {
+  var obj = $.grep(challenges['game'], function (e) {
+                return e.id == $('#chal-id').val();
+            })[0];
+  if (obj && obj.is_solved) {
+    try {
+      rating = parseInt(rating);
+    } catch (e) {
+      return;
+    }
+    if (rating > 5 || rating < 0) {
+      return;
+    }
+    console.log(rating);
+    var ajaxConfig = {
+      url: '/rate/'+obj.id,
+      method: 'POST',
+      data: {
+        mark: rating,
+        nonce: $('[name=nonce]').val()
+      },
+      dataType: 'json',
+      success: function(json) {
+        $('#rateOk').removeClass('hidden');
+        window.setTimeout(function() {
+          $('#rateOk').addClass('hidden');
+        }, 1000);
+      }
+
+    };
+    $.ajax(ajaxConfig);
+  }
+}
 
 setInterval(update, 300000);

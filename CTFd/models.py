@@ -259,3 +259,15 @@ class Notepads(db.Model):
   def __repr__(self):
     return "<Notepads %r>" % self.content
 
+
+class Marks(db.Model):
+  id      = db.Column(db.Integer, primary_key=True)
+  teamid  = db.Column(db.Integer, db.ForeignKey('teams.id'))
+  chalid  = db.Column(db.Integer, db.ForeignKey('challenges.id'))
+  mark    = db.Column(db.Integer)
+
+  def __init__(self, teamid, chalid, mark):
+    self.teamid = teamid
+    self.chalid = chalid
+    self.mark   = mark
+

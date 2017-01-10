@@ -386,4 +386,8 @@ table{
   display: none;
 }
 
+#set_mark {
+  text-align: left;
+}
+
 /* END OF INPUT CSS */
