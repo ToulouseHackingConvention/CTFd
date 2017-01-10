@@ -7,7 +7,7 @@ from flask import render_template, request, redirect, jsonify, url_for, session,
 from sqlalchemy.sql import or_
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name
-from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, Notepads
+from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, Notepads, Marks
 
 challenges = Blueprint('challenges', __name__)
 
@@ -102,13 +102,20 @@ def solves(teamid=None):
     db.session.close()
     json = {'solves': []}
     for solve in solves:
+        if solve.teamid == session['id']:
+          marks = Marks.query.filter_by(teamid=session['id'],chalid=solve.chalid).all()
+          if marks:
+            mark = marks[0].mark
+          else:
+            mark = None
         json['solves'].append({
             'chal': solve.chal.name,
             'chalid': solve.chalid,
             'team': solve.teamid,
             'value': solve.chal.value,
             'category': solve.chal.category,
-            'time': unix_time(solve.date)
+            'time': unix_time(solve.date),
+            'mark':mark
         })
     if awards:
         for award in awards:
@@ -262,3 +269,26 @@ def update_notepad(chalid):
   db.session.commit()
   db.session.close()
   return jsonify({'error': False})
+
+@challenges.route('/rate/<chalid>', methods=['POST'])
+def set_mark(chalid):
+  mark = request.form['mark']
+  if re.match('^[0-5]$', mark) and re.match('^[0-9]+$', chalid):
+    mark  = int(mark)
+    chalid  = int(chalid)
+    solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+    if solve:
+      entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+      if not entry:
+        entry = Marks(session['id'], chalid, mark)
+      else:
+        entry = entry[0]
+        entry.mark   = mark
+      db.session.add(entry)
+      db.session.commit()
+      db.session.close()
+      return jsonify({'error':False})
+    else:
+      return jsonify({'error':True, 'errstr':'You have to solve this challenge before rate it.'})
+  else:
+    return jsonify({'error':True, 'errstr':'Bad arguments.'})
