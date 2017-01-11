@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="/static/original/js/rateYo/jquery.rateyo.min.css" />
+<link rel="stylesheet" href="{{ request.script_root }}/static/{{ ctf_theme() }}/css/vendor/jquery.rateyo.min.css" />
 <style>
     .hide-text { text-overflow: ellipsis; overflow: hidden; }
     .dialog-inner {padding-bottom: 30px;}
@@ -176,7 +176,7 @@
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/utils.js"></script>
     {% if not errors %}<script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/chalboard.js"></script>{% endif %}
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/style.js"></script>
-    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/rateYo/jquery.rateyo.min.js"></script>
+    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/vendor/jquery.rateyo.min.js"></script>
     <script>
 $(function () {
  
