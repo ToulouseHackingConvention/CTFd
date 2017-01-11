@@ -65,7 +65,7 @@ def chals():
 
 
 @challenges.route('/chals/solves')
-def chals_per_solves():
+def solves_per_chal():
     if not user_can_view_challenges():
         return redirect(url_for('auth.login', next=request.path))
     solves_sub = db.session.query(Solves.chalid, db.func.count(Solves.chalid).label('solves')).join(Teams, Solves.teamid == Teams.id).filter(Teams.banned == False).group_by(Solves.chalid).subquery()
@@ -86,7 +86,7 @@ def solves(teamid=None):
     if teamid is None:
         if is_admin():
             solves = Solves.query.filter_by(teamid=session['id']).all()
-        elif authed():
+        elif user_can_view_challenges():
             solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id'], Teams.banned == False).all()
         else:
             return redirect(url_for('auth.login', next='solves'))
