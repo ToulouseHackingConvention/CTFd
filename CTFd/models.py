@@ -1,3 +1,4 @@
+import collections
 import datetime
 import hashlib
 import json
@@ -7,6 +8,46 @@ from struct import unpack, pack, error as struct_error
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import bcrypt_sha256
 from sqlalchemy.exc import DatabaseError
+
+
+def get_solves_and_value(is_admin=False):
+    """
+    Return Solves OR Awards.
+    Output is not necessarily ordered.
+    DO NOT SUBMIT
+    """
+    solves = db.session.query(Solves).join(Challenges) \
+        .order_by(Solves.chalid, Solves.date)
+    if not is_admin:
+        solves = solves.filter(Teams.banned == False)
+
+    score_by_team = collections.Counter()
+
+    current_chal_id = None
+    current_chal_solves = 0
+    for solve in solves:
+        if solve.chalid != current_chal_id:
+            current_chal_id = solve.chalid
+            current_chal_solves = 1
+        else:
+            current_chal_solves += 1
+
+        bonus = max(4 - current_chal_solves, 0)
+        yield (solve, solve.chal.value + bonus)
+
+    # Let's not forget to yield the awards too.
+    awards = db.session.query(Awards).order_by(Awards.date)
+    if not is_admin:
+        awards = awards.filter(Teams.banned == False)
+    for award in awards:
+        yield (award, award.value)
+
+
+def score_by_team(is_admin=False):
+    score_by_team = collections.Counter()
+    for solve, value in get_solves_and_value(is_admin=is_admin):
+        score_by_team[solve.team] += value
+    return score_by_team
 
 
 def sha512(string):
@@ -83,6 +124,7 @@ class Awards(db.Model):
     value = db.Column(db.Integer)
     category = db.Column(db.String(80))
     icon = db.Column(db.Text)
+    team = db.relationship('Teams', foreign_keys="Awards.teamid", lazy='joined')
 
     def __init__(self, teamid, name, value):
         self.teamid = teamid
@@ -158,28 +200,25 @@ class Teams(db.Model):
 
     def __repr__(self):
         return '<team %r>' % self.name
-
     def score(self):
-        score = db.func.sum(Challenges.value).label('score')
-        team = db.session.query(Solves.teamid, score).join(Teams).join(Challenges).filter(Teams.banned == False, Teams.id == self.id).group_by(Solves.teamid).first()
-        award_score = db.func.sum(Awards.value).label('award_score')
-        award = db.session.query(award_score).filter_by(teamid=self.id).first()
-        if team:
-            return int(team.score or 0) + int(award.award_score or 0)
-        else:
-            return 0
+        """Score for the team, dynamically computed."""
+        return score_by_team()[self]
 
     def place(self):
-        score = db.func.sum(Challenges.value).label('score')
-        quickest = db.func.max(Solves.date).label('quickest')
-        teams = db.session.query(Solves.teamid).join(Teams).join(Challenges).filter(Teams.banned == False).group_by(Solves.teamid).order_by(score.desc(), quickest).all()
-        # http://codegolf.stackexchange.com/a/4712
-        try:
-            i = teams.index((self.id,)) + 1
+        """A string with the ranking of the team.
+
+        Example: "1st", "3rd"...
+        """
+        def place_to_str(i):
+            # http://codegolf.stackexchange.com/a/4712
             k = i % 10
-            return "%d%s" % (i, "tsnrhtdd"[(i / 10 % 10 != 1) * (k < 4) * k::4])
-        except ValueError:
-            return 0
+            return '%d%s' % (i, 'tsnrhtdd'[(i / 10 % 10 != 1) * (k < 4) * k::4])
+
+        for place, (team, score) in enumerate(score_by_team().most_common()):
+            if self.id == team.id:
+                return place_to_str(place + 1)
+
+        return '0'  # team is banned, or other error.
 
 
 class Solves(db.Model):

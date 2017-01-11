@@ -10,8 +10,7 @@ from werkzeug.utils import secure_filename
 from CTFd.utils import admins_only, is_admin, unix_time, get_config, \
     set_config, sendmail, rmdir, create_image, delete_image, run_image, container_status, container_ports, \
     container_stop, container_start, get_themes, cache
-from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError
-from CTFd.scoreboard import get_standings
+from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError, score_by_team
 from CTFd import countries
 
 admin = Blueprint('admin', __name__)
@@ -569,8 +568,9 @@ def admin_graph(graph_type):
 @admin.route('/admin/scoreboard')
 @admins_only
 def admin_scoreboard():
-    standings = get_standings(admin=True)
-    return render_template('admin/scoreboard.html', teams=standings)
+    return render_template(
+        'admin/scoreboard.html',
+        teams=score_by_team(is_admin=True).most_common())
 
 
 @admin.route('/admin/teams/<teamid>/awards', methods=['GET'])

@@ -1,5 +1,6 @@
 import json
 import logging
+import operator
 import re
 import time
 
@@ -7,7 +8,7 @@ from flask import render_template, request, redirect, jsonify, url_for, session,
 from sqlalchemy.sql import or_
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name
-from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards
+from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, get_solves_and_value
 
 challenges = Blueprint('challenges', __name__)
 
@@ -81,41 +82,26 @@ def solves_per_chal():
 @challenges.route('/solves')
 @challenges.route('/solves/<teamid>')
 def solves(teamid=None):
-    solves = None
-    awards = None
     if teamid is None:
-        if is_admin():
-            solves = Solves.query.filter_by(teamid=session['id']).all()
-        elif user_can_view_challenges():
-            solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id'], Teams.banned == False).all()
+        if is_admin() or user_can_view_challenges():
+            teamid = session['id']
         else:
             return redirect(url_for('auth.login', next='solves'))
-    else:
-        solves = Solves.query.filter_by(teamid=teamid).all()
-        awards = Awards.query.filter_by(teamid=teamid).all()
-    db.session.close()
-    json = {'solves': []}
-    for solve in solves:
-        json['solves'].append({
-            'chal': solve.chal.name,
-            'chalid': solve.chalid,
-            'team': solve.teamid,
-            'value': solve.chal.value,
-            'category': solve.chal.category,
-            'time': unix_time(solve.date)
-        })
-    if awards:
-        for award in awards:
-            json['solves'].append({
-                'chal': award.name,
-                'chalid': None,
-                'team': award.teamid,
-                'value': award.value,
-                'category': award.category,
-                'time': unix_time(award.date)
+    teamid = int(teamid)
+
+    user_solves = []
+    for solve, value in get_solves_and_value(is_admin=is_admin()):
+        if solve.teamid == teamid:
+            user_solves.append({
+                'chalid': solve.chalid,
+                'chal': solve.chal.name,
+                'team': solve.teamid,
+                'value': value,
+                'category': solve.chal.category,
+                'time': unix_time(solve.date),
             })
-    json['solves'].sort(key=lambda k: k['time'])
-    return jsonify(json)
+    user_solves = sorted(user_solves, key=operator.itemgetter('time'))
+    return jsonify({'solves': user_solves})
 
 
 @challenges.route('/maxattempts')
@@ -176,7 +162,7 @@ def chal(chalid):
 
         solves = Solves.query.filter_by(teamid=session['id'], chalid=chalid).first()
 
-        # Challange not solved yet
+        # Challenge not solved yet
         if not solves:
             chal = Challenges.query.filter_by(id=chalid).first()
             key = unicode(request.form['key'].strip().lower())

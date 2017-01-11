@@ -131,16 +131,17 @@ def teams(page):
     return render_template('teams.html', teams=teams, team_pages=pages, curr_page=page)
 
 
+# DO NOT SUBMIT: I need to update this too.
 @views.route('/team/<teamid>', methods=['GET', 'POST'])
 def team(teamid):
     if get_config('view_scoreboard_if_authed') and not authed():
         return redirect(url_for('auth.login', next=request.path))
+
     user = Teams.query.filter_by(id=teamid).first_or_404()
     solves = Solves.query.filter_by(teamid=teamid)
     awards = Awards.query.filter_by(teamid=teamid).all()
     score = user.score()
     place = user.place()
-    db.session.close()
 
     if request.method == 'GET':
         return render_template('team.html', solves=solves, awards=awards, team=user, score=score, place=place)
