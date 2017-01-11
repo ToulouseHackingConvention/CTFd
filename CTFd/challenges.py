@@ -55,10 +55,7 @@ def chals():
         json = {'game': []}
         for x in chals:
             notepad = notepads.filter_by(chalid=x.id).add_columns('content').first()
-            if notepad is None:
-                notepad = ""
-            else:
-                notepad = notepad.content
+            notepad = notepad.content if notepad else ''
             tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x[1]).all()]
             files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
             json['game'].append({'id': x[1], 'name': x[2], 'value': x[3], 'description': x[4], 'category': x[5], 'files': files, 'tags': tags, 'notepad': notepad})
@@ -103,11 +100,11 @@ def solves(teamid=None):
     json = {'solves': []}
     for solve in solves:
         if solve.teamid == session['id']:
-          marks = Marks.query.filter_by(teamid=session['id'],chalid=solve.chalid).all()
-          if marks:
-            mark = marks[0].mark
-          else:
-            mark = None
+            marks = Marks.query.filter_by(teamid=session['id'], chalid=solve.chalid).all()
+            if marks:
+                mark = marks[0].mark
+            else:
+                mark = None
         json['solves'].append({
             'chal': solve.chal.name,
             'chalid': solve.chalid,
@@ -115,7 +112,7 @@ def solves(teamid=None):
             'value': solve.chal.value,
             'category': solve.chal.category,
             'time': unix_time(solve.date),
-            'mark':mark
+            'mark': mark
         })
     if awards:
         for award in awards:
@@ -254,41 +251,42 @@ def chal(chalid):
 
 @challenges.route('/chal/<chalid>/notepad', methods=['POST'])
 def update_notepad(chalid):
-  if not authed() or not is_verified():
-      return jsonify({'error': True})
+    if not authed() or not is_verified():
+        return jsonify({'error': True})
 
-  teamid = session['id']
-  content = request.form['content'][:4096]
-  notepad = Notepads.query.filter_by(chalid=chalid, teamid=teamid).first()
-  if notepad is None:
-      notepad = Notepads(teamid, chalid, content)
-  else:
-      notepad.content = content
+    teamid = session['id']
+    content = request.form['content'][:4096]
+    notepad = Notepads.query.filter_by(chalid=chalid, teamid=teamid).first()
+    if notepad is None:
+        notepad = Notepads(teamid, chalid, content)
+    else:
+        notepad.content = content
 
-  db.session.add(notepad)
-  db.session.commit()
-  db.session.close()
-  return jsonify({'error': False})
+    db.session.add(notepad)
+    db.session.commit()
+    db.session.close()
+    return jsonify({'error': False})
+
 
 @challenges.route('/rate/<chalid>', methods=['POST'])
 def set_mark(chalid):
-  mark = request.form['mark']
-  if re.match('^[0-5]$', mark) and re.match('^[0-9]+$', chalid):
-    mark  = int(mark)
-    chalid  = int(chalid)
-    solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
-    if solve:
-      entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
-      if not entry:
-        entry = Marks(session['id'], chalid, mark)
-      else:
-        entry = entry[0]
-        entry.mark   = mark
-      db.session.add(entry)
-      db.session.commit()
-      db.session.close()
-      return jsonify({'error':False})
+    mark = request.form['mark']
+    if re.match('^[0-5]$', mark) and re.match('^[0-9]+$', chalid):
+        mark = int(mark)
+        chalid = int(chalid)
+        solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+        if solve:
+            entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+            if not entry:
+                entry = Marks(session['id'], chalid, mark)
+            else:
+                entry = entry[0]
+                entry.mark = mark
+            db.session.add(entry)
+            db.session.commit()
+            db.session.close()
+            return jsonify({'error': False})
+        else:
+            return jsonify({'error': True, 'errstr': 'You have to solve this challenge before rating it.'})
     else:
-      return jsonify({'error':True, 'errstr':'You have to solve this challenge before rate it.'})
-  else:
-    return jsonify({'error':True, 'errstr':'Bad arguments.'})
+        return jsonify({'error': True, 'errstr': 'Bad arguments.'})
