@@ -46,10 +46,10 @@
             <tbody>
             {% for solve, value in solves %}
                 <tr>
-                {% if solve.chalid %}
+                {% if solve.chalid %}{# We need to distinguish between Solves and Awards: this is for Solves #}
                     <td><a href="{{ request.script_root }}/challenges#{{ solve.chal.name }}">{{ solve.chal.name }}</a></td>
                     <td class="hidden-xs">{{ solve.chal.category }}</td>
-                {% else %}
+                {% else %}{# This is for Awards #}
                     <td>Award: {{ solve.name }}</td>
                     <td class="hidden-xs">{{ solve.category }}</td>
                 {% endif %}

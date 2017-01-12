@@ -97,14 +97,18 @@ def solves(teamid=None):
                 'value': value,
                 'time': unix_time(solve.date),
             }
-            if hasattr(solve, 'chalid'):  # It's a solve
+            if isinstance(solve, Solves):
                 j['chalid'] = solve.chalid
                 j['chal'] = solve.chal.name
                 j['category'] = solve.chal.category
-            else:  # It's an award
+            elif isinstance(solve, Awards):
                 j['chalid'] = None
                 j['chal'] = solve.name
                 j['category'] = solve.category
+            else:
+                raise RuntimeError(
+                    "Objects returned by get_solves_and_value "
+                    "should be Solves or Awards")
             user_solves.append(j)
 
     user_solves = sorted(user_solves, key=operator.itemgetter('time'))
