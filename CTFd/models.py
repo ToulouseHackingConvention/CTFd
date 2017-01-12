@@ -11,10 +11,19 @@ from sqlalchemy.exc import DatabaseError
 
 
 def get_solves_and_value(is_admin=False):
-    """
-    Return Solves OR Awards.
-    Output is not necessarily ordered.
-    DO NOT SUBMIT
+    """Generator to get all the solves/awards.
+
+    Args:
+        is_admin: Whether the user is an admin or not. If not, we ignore
+            the teams that are banned.
+
+    Yields:
+        Couples (solve, value).
+        Where solve can be either a Solves model, or an Awards model.
+        Value is an integer with the value for that solve/award, including
+        eventual bonuses.
+        It is wrong to assume that they are ordered by time (we start from
+        the beginning again, for awards).
     """
     solves = db.session.query(Solves).join(Challenges) \
         .order_by(Solves.chalid, Solves.date)
