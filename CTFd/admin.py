@@ -639,39 +639,6 @@ def admin_scores():
     return jsonify(json_data)
 
 
-@admin.route('/admin/solves/<teamid>', methods=['GET'])
-@admins_only
-def admin_solves(teamid="all"):
-    if teamid == "all":
-        solves = Solves.query.all()
-    else:
-        solves = Solves.query.filter_by(teamid=teamid).all()
-        awards = Awards.query.filter_by(teamid=teamid).all()
-    db.session.close()
-    json_data = {'solves': []}
-    for x in solves:
-        json_data['solves'].append({
-            'id': x.id,
-            'chal': x.chal.name,
-            'chalid': x.chalid,
-            'team': x.teamid,
-            'value': x.chal.value,
-            'category': x.chal.category,
-            'time': unix_time(x.date)
-        })
-    for award in awards:
-        json_data['solves'].append({
-            'chal': award.name,
-            'chalid': None,
-            'team': award.teamid,
-            'value': award.value,
-            'category': award.category,
-            'time': unix_time(award.date)
-        })
-    json_data['solves'].sort(key=lambda k: k['time'])
-    return jsonify(json_data)
-
-
 @admin.route('/admin/solves/<teamid>/<chalid>/solve', methods=['POST'])
 @admins_only
 def create_solve(teamid, chalid):

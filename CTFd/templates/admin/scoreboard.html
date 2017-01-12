@@ -18,17 +18,17 @@
         {% for team, score in teams %}
             <tr>
                 <td>{{ loop.index }}</td>
-                <td><a href="{{ request.script_root }}/admin/team/{{ team.teamid }}">{{ team.name }}</a></td>
+                <td><a href="{{ request.script_root }}/admin/team/{{ team.id }}">{{ team.name }}</a></td>
                 <td>{% if team.country %}<img src="{{ request.script_root }}/static/{{ ctf_theme() }}/img/flags/{{ team.country }}.png">{% endif %}</td>
                 <td>{{ score }}</td>
                 <td>
                 {% if not team.banned %}
-                <form method="POST" style="margin:0;" action="{{ request.script_root }}/admin/team/{{ team.teamid }}/ban">
+                <form method="POST" style="margin:0;" action="{{ request.script_root }}/admin/team/{{ team.id }}/ban">
                     <a onclick="$(this).parent().submit()">Ban</a>
                     <input type="hidden" value="{{ nonce }}" name="nonce">
                 </form>
                 {%else %}
-                <form method="POST" style="margin:0;" action="{{ request.script_root }}/admin/team/{{ team.teamid }}/unban">
+                <form method="POST" style="margin:0;" action="{{ request.script_root }}/admin/team/{{ team.id }}/unban">
                     <a onclick="$(this).parent().submit()">Unban</a>
                     <input type="hidden" value="{{ nonce }}" name="nonce">
                 </form>

@@ -92,14 +92,21 @@ def solves(teamid=None):
     user_solves = []
     for solve, value in get_solves_and_value(is_admin=is_admin()):
         if solve.teamid == teamid:
-            user_solves.append({
-                'chalid': solve.chalid,
-                'chal': solve.chal.name,
+            j = {
                 'team': solve.teamid,
                 'value': value,
-                'category': solve.chal.category,
                 'time': unix_time(solve.date),
-            })
+            }
+            if hasattr(solve, 'chalid'):  # It's a solve
+                j['chalid'] = solve.chalid
+                j['chal'] = solve.chal.name
+                j['category'] = solve.chal.category
+            else:  # It's an award
+                j['chalid'] = None
+                j['chal'] = solve.name
+                j['category'] = solve.category
+            user_solves.append(j)
+
     user_solves = sorted(user_solves, key=operator.itemgetter('time'))
     return jsonify({'solves': user_solves})
 
@@ -130,7 +137,7 @@ def fails(teamid):
 def who_solved(chalid):
     if not user_can_view_challenges():
         return redirect(url_for('auth.login', next=request.path))
-    solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.chalid == chalid, Teams.banned == False).order_by(Solves.date.asc())
+    solves = Solves.query.join(Teams).filter(Solves.chalid == chalid, Teams.banned == False).order_by(Solves.date)
     json = {'teams': []}
     for solve in solves:
         json['teams'].append({'id': solve.team.id, 'name': solve.team.name, 'date': solve.date})
