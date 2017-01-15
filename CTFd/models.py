@@ -30,8 +30,6 @@ def get_solves_and_value(is_admin=False):
     if not is_admin:
         solves = solves.filter(Teams.banned == False)
 
-    score_by_team = collections.Counter()
-
     current_chal_id = None
     current_chal_solves = 0
     for solve in solves:
