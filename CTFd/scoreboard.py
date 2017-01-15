@@ -55,7 +55,7 @@ def topteams(count):
         if solve.teamid in team_ids:
             scores[solve.team.name].append({
                 # It can be an award, without chalid
-                'chal': solve.chalid if hasattr(solve, 'chalid') else None,
+                'chal': solve.chalid if isinstance(solve, Solves) else None,
                 'team': solve.teamid,
                 'value': value,
                 'time': unix_time(solve.date),
