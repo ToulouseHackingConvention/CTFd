@@ -5,7 +5,7 @@ Liste des changements à faire, par ordre de priorité.
 ## Urgent
 
 - [X] Chaque équipe doit pouvoir choisir son pays, et le drapeau doit être affiché dans le classement
-- [ ] Implémenter notre système de points (point fixe + (+3/+2/+1) pour les breakthrough)
+- [X] Implémenter notre système de points (point fixe + (+3/+2/+1) pour les breakthrough)
 - [ ] Le format de flag doit être THCon{[a-zA-Z0-9\_]+}. Accepter le flag même si l'utilisateur ne donne que ce qu'il y a dans les accolades.
 - [ ] Ajouter un système d'announcement, qui permettra aussi de communiquer les indices
 
