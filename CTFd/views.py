@@ -7,7 +7,7 @@ from passlib.hash import bcrypt_sha256
 
 from CTFd.utils import authed, is_setup, validate_url, get_config, set_config, sha512, cache, ctftime, view_after_ctf, ctf_started, \
     is_admin
-from CTFd.models import db, Teams, Solves, Awards, Files, Pages
+from CTFd.models import db, Teams, Solves, Awards, Files, Pages, get_solves_and_value
 from CTFd import countries
 
 views = Blueprint('views', __name__)
@@ -135,17 +135,22 @@ def teams(page):
 def team(teamid):
     if get_config('view_scoreboard_if_authed') and not authed():
         return redirect(url_for('auth.login', next=request.path))
-    user = Teams.query.filter_by(id=teamid).first_or_404()
-    solves = Solves.query.filter_by(teamid=teamid)
-    awards = Awards.query.filter_by(teamid=teamid).all()
-    score = user.score()
-    place = user.place()
-    db.session.close()
+    teamid = int(teamid)
+
+    team = Teams.query.filter_by(id=teamid).first_or_404()
+    score = team.score()
+    place = team.place()
+
+    solves_with_value = [
+        (solve, value) for solve, value in get_solves_and_value()
+        if solve.teamid == teamid]
+    solves_with_value.sort(key=lambda solve_value: solve_value[0].date)
 
     if request.method == 'GET':
-        return render_template('team.html', solves=solves, awards=awards, team=user, score=score, place=place)
+        return render_template('team.html', solves=solves_with_value, team=team, score=score, place=place)
     elif request.method == 'POST':
         json = {'solves': []}
+        solves = Solves.query.filter_by(teamid=teamid)
         for x in solves:
             json['solves'].append({'id': x.id, 'chal': x.chalid, 'team': x.teamid})
         return jsonify(json)

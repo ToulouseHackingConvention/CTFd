@@ -10,8 +10,7 @@ from werkzeug.utils import secure_filename
 from CTFd.utils import admins_only, is_admin, unix_time, get_config, \
     set_config, sendmail, rmdir, create_image, delete_image, run_image, container_status, container_ports, \
     container_stop, container_start, get_themes, cache
-from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError
-from CTFd.scoreboard import get_standings
+from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError, score_by_team, get_solves_and_value
 from CTFd import countries
 
 admin = Blueprint('admin', __name__)
@@ -429,11 +428,15 @@ def admin_teams(page):
 @admin.route('/admin/team/<teamid>', methods=['GET', 'POST'])
 @admins_only
 def admin_team(teamid):
+    teamid = int(teamid)
     user = Teams.query.filter_by(id=teamid).first()
 
     if request.method == 'GET':
-        solves = Solves.query.filter_by(teamid=teamid).all()
-        solve_ids = [s.chalid for s in solves]
+        solves_with_value = [
+            (solve, value) for solve, value in get_solves_and_value(is_admin=True)
+            if isinstance(solve, Solves) and solve.teamid == teamid]
+        solves_with_value.sort(key=lambda solve_value: solve_value[0].date)
+        solve_ids = [solve.chalid for solve, value in solves_with_value]
         missing = Challenges.query.filter(not_(Challenges.id.in_(solve_ids))).all()
         last_seen = db.func.max(Tracking.date).label('last_seen')
         addrs = db.session.query(Tracking.ip, last_seen) \
@@ -444,7 +447,7 @@ def admin_team(teamid):
         awards = Awards.query.filter_by(teamid=teamid).order_by(Awards.date.asc()).all()
         score = user.score()
         place = user.place()
-        return render_template('admin/team.html', solves=solves, team=user, addrs=addrs, score=score, missing=missing,
+        return render_template('admin/team.html', solves=solves_with_value, team=user, addrs=addrs, score=score, missing=missing,
                                place=place, wrong_keys=wrong_keys, awards=awards)
     elif request.method == 'POST':
         admin_user = request.form.get('admin', None)
@@ -569,8 +572,9 @@ def admin_graph(graph_type):
 @admin.route('/admin/scoreboard')
 @admins_only
 def admin_scoreboard():
-    standings = get_standings(admin=True)
-    return render_template('admin/scoreboard.html', teams=standings)
+    return render_template(
+        'admin/scoreboard.html',
+        teams=score_by_team(is_admin=True).most_common())
 
 
 @admin.route('/admin/teams/<teamid>/awards', methods=['GET'])
@@ -636,39 +640,6 @@ def admin_scores():
     json_data = {'teams': []}
     for i, x in enumerate(teams):
         json_data['teams'].append({'place': i + 1, 'id': x.teamid, 'name': x.name, 'score': int(x.score)})
-    return jsonify(json_data)
-
-
-@admin.route('/admin/solves/<teamid>', methods=['GET'])
-@admins_only
-def admin_solves(teamid="all"):
-    if teamid == "all":
-        solves = Solves.query.all()
-    else:
-        solves = Solves.query.filter_by(teamid=teamid).all()
-        awards = Awards.query.filter_by(teamid=teamid).all()
-    db.session.close()
-    json_data = {'solves': []}
-    for x in solves:
-        json_data['solves'].append({
-            'id': x.id,
-            'chal': x.chal.name,
-            'chalid': x.chalid,
-            'team': x.teamid,
-            'value': x.chal.value,
-            'category': x.chal.category,
-            'time': unix_time(x.date)
-        })
-    for award in awards:
-        json_data['solves'].append({
-            'chal': award.name,
-            'chalid': None,
-            'team': award.teamid,
-            'value': award.value,
-            'category': award.category,
-            'time': unix_time(award.date)
-        })
-    json_data['solves'].sort(key=lambda k: k['time'])
     return jsonify(json_data)
 
 

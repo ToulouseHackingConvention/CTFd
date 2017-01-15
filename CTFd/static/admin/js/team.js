@@ -16,7 +16,7 @@ function scoregraph () {
     var times = []
     var scores = []
     var teamname = $('#team-id').text()
-    $.get(script_root + '/admin/solves/'+teamid(), function( data ) {
+    $.get(script_root + '/solves/'+teamid(), function( data ) {
         var solves = $.parseJSON(JSON.stringify(data));
         solves = solves['solves'];
 
@@ -75,7 +75,7 @@ function keys_percentage_graph(){
 }
 
 function category_breakdown_graph(){
-    $.get(script_root + '/admin/solves/'+teamid(), function(data){
+    $.get(script_root + '/solves/'+teamid(), function(data){
         var solves = $.parseJSON(JSON.stringify(data));
         solves = solves['solves'];
 

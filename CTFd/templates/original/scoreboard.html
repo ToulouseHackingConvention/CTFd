@@ -20,12 +20,12 @@
             </tr>
         </thead>
         <tbody>
-        {% for team in teams %}
+        {% for team, score in teams %}
             <tr>
                 <td>{{ loop.index }}</td>
-                <td><a href="{{ request.script_root }}/team/{{ team.teamid }}">{{ team.name }}</a></td>
+                <td><a href="{{ request.script_root }}/team/{{ team.id }}">{{ team.name }}</a></td>
                 <td>{% if team.country %}<img src="{{ request.script_root }}/static/{{ ctf_theme() }}/img/flags/{{ team.country }}.png">{% endif %}</td>
-                <td>{{ team.score }}</td>
+                <td>{{ score }}</td>
             </tr>
         {% endfor %}
         </tbody>
