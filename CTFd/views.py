@@ -144,8 +144,7 @@ def team(teamid):
     solves_with_value = [
         (solve, value) for solve, value in get_solves_and_value()
         if solve.teamid == teamid]
-    solves_with_value = sorted(
-        solves_with_value, key=lambda solve_value: solve_value[0].date)
+    solves_with_value.sort(key=lambda solve_value: solve_value[0].date)
 
     if request.method == 'GET':
         return render_template('team.html', solves=solves_with_value, team=team, score=score, place=place)

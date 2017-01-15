@@ -158,12 +158,12 @@
             </tr>
         </thead>
         <tbody>
-        {% for solve in solves %}
+        {% for solve, value in solves %}
             <tr class="chal-solve">
                 <td class="text-center chal" id="{{ solve.chalid }}">{{ solve.chal.name }}</td>
                 <td class="text-center flag" id="{{ solve.id }}">{{ solve.flag }}</td>
                 <td class="text-center">{{ solve.chal.category }}</td>
-                <td class="text-center">{{ solve.chal.value }}</td>
+                <td class="text-center">{{ value }}</td>
                 <td class="text-center solve-time"><script>document.write( moment({{ solve.date|unix_time_millis }}).local().format('MMMM Do, h:mm:ss A'))</script></td>
                 <td class="text-center"><i class="fa fa-times"></i></td>
             </tr>
