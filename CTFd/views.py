@@ -156,37 +156,43 @@ def team(teamid):
 @views.route('/profile', methods=['POST', 'GET'])
 def profile():
     if authed():
+        team = Teams.query.filter_by(id=session['id']).first()
+
         if request.method == "POST":
             errors = []
 
             name = request.form.get('name')
             email = request.form.get('email')
-            website = request.form.get('website')
-            affiliation = request.form.get('affiliation')
+            website = request.form.get('website', '')
+            affiliation = request.form.get('affiliation', '')
             country = request.form.get('country')
 
-            user = Teams.query.filter_by(id=session['id']).first()
-
             if not get_config('prevent_name_change'):
-                names = Teams.query.filter_by(name=name).first()
-                name_len = len(request.form['name']) == 0
+                if not name:
+                    errors.append('Pick a longer team name')
+                else:
+                    names = Teams.query.filter_by(name=name).first()
+                    if names and name != team.name:
+                        errors.append('That team name is already taken')
 
-            emails = Teams.query.filter_by(email=email).first()
-            valid_email = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email)
-
-            if ('password' in request.form.keys() and not len(request.form['password']) == 0) and \
-                    (not bcrypt_sha256.verify(request.form.get('confirm').strip(), user.password)):
-                errors.append("Your old password doesn't match what we have.")
-            if not valid_email:
+            if not email:
+                errors.append('Pick a longer email')
+            elif not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
                 errors.append("That email doesn't look right")
-            if not get_config('prevent_name_change') and names and name != session['username']:
-                errors.append('That team name is already taken')
-            if emails and emails.id != session['id']:
-                errors.append('That email has already been used')
-            if not get_config('prevent_name_change') and name_len:
-                errors.append('Pick a longer team name')
-            if website.strip() and not validate_url(website):
+            else:
+                emails = Teams.query.filter_by(email=email).first()
+                if emails and emails.id != team.id:
+                    errors.append('That email has already been used')
+
+            if request.form.get('new-password'):
+                if request.form.get('new-password') != request.form.get('new-password-confirm'):
+                    errors.append("These passwords don't match")
+                elif not bcrypt_sha256.verify(request.form.get('current-password'), team.password):
+                    errors.append("Your old password doesn't match what we have")
+
+            if website and not validate_url(website):
                 errors.append("That doesn't look like a valid URL")
+
             if country not in countries.keys:
                 errors.append('Invalid country')
 
@@ -194,17 +200,19 @@ def profile():
                 return render_template('profile.html', name=name, email=email, website=website,
                                        affiliation=affiliation, country=country, countries=countries, errors=errors)
             else:
-                team = Teams.query.filter_by(id=session['id']).first()
-                if not get_config('prevent_name_change'):
+                if not get_config('prevent_name_change') and team.name != name:
                     team.name = name
+                    session['username'] = name
+
                 if team.email != email.lower():
                     team.email = email.lower()
+
                     if get_config('verify_emails'):
                         team.verified = False
-                session['username'] = team.name
 
-                if 'password' in request.form.keys() and not len(request.form['password']) == 0:
-                    team.password = bcrypt_sha256.encrypt(request.form.get('password'))
+                if request.form.get('new-password'):
+                    team.password = bcrypt_sha256.encrypt(request.form['new-password'])
+
                 team.website = website
                 team.affiliation = affiliation
                 team.country = country
@@ -212,14 +220,13 @@ def profile():
                 db.session.close()
                 return redirect(url_for('views.profile'))
         else:
-            user = Teams.query.filter_by(id=session['id']).first()
-            name = user.name
-            email = user.email
-            website = user.website
-            affiliation = user.affiliation
-            country = user.country
+            name = team.name
+            email = team.email
+            website = team.website
+            affiliation = team.affiliation
+            country = team.country
             prevent_name_change = get_config('prevent_name_change')
-            confirm_email = get_config('verify_emails') and not user.verified
+            confirm_email = get_config('verify_emails') and not team.verified
             return render_template('profile.html', name=name, email=email, website=website, affiliation=affiliation,
                                    country=country, countries=countries, prevent_name_change=prevent_name_change, confirm_email=confirm_email)
     else:

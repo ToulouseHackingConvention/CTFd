@@ -61,6 +61,14 @@ def reset_password(data=None):
             return render_template('reset_password.html', errors=['Your link has expired'])
         except:
             return render_template('reset_password.html', errors=['Your link appears broken, please try again.'])
+
+        if not request.form.get('password'):
+            return render_template('reset_password.html', mode='set', errors=['Pick a longer password'])
+        elif len(request.form['password']) > 128:
+            return render_template('reset_password.html', mode='set', errors=['Pick a shorter password'])
+        elif request.form['password'] != request.form.get('password-confirm'):
+            return render_template('reset_password.html', mode='set', errors=["These passwords don't match"])
+
         team = Teams.query.filter_by(name=name).first_or_404()
         team.password = bcrypt_sha256.encrypt(request.form['password'].strip())
         db.session.commit()
@@ -93,39 +101,48 @@ def register():
         return redirect(url_for('auth.login'))
     if request.method == 'POST':
         errors = []
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-        website = request.form['website']
-        affiliation = request.form['affiliation']
-        country = request.form['country']
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        password_confirm = request.form.get('password-confirm')
+        website = request.form.get('website', '')
+        affiliation = request.form.get('affiliation', '')
+        country = request.form.get('country')
 
-        name_len = len(name) == 0
-        names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
-        emails = Teams.query.add_columns('email', 'id').filter_by(email=email).first()
-        pass_short = len(password) == 0
-        pass_long = len(password) > 128
-        valid_email = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", request.form['email'])
-
-        if not valid_email:
-            errors.append("That email doesn't look right")
-        if names:
-            errors.append('That team name is already taken')
-        if emails:
-            errors.append('That email has already been used')
-        if pass_short:
-            errors.append('Pick a longer password')
-        if pass_long:
-            errors.append('Pick a shorter password')
-        if name_len:
+        if not name:
             errors.append('Pick a longer team name')
+        else:
+            names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
+            if names:
+                errors.append('That team name is already taken')
+
+        if not email:
+            errors.append('Pick a longer email')
+        elif not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
+            errors.append("That email doesn't look right")
+        else:
+            emails = Teams.query.add_columns('email', 'id').filter_by(email=email).first()
+            if emails:
+                errors.append('That email has already been used')
+
+        if not password:
+            errors.append('Pick a longer password')
+            password = password_confirm = ''
+        elif len(password) > 128:
+            errors.append('Pick a shorter password')
+            password = password_confirm = ''
+        elif password != password_confirm:
+            errors.append("These passwords don't match")
+            password = password_confirm = ''
+
         if website.strip() and not validate_url(website):
             errors.append("That doesn't look like a valid URL")
+
         if country not in countries.keys:
             errors.append('Invalid country')
 
         if len(errors) > 0:
-            return render_template('register.html', errors=errors, name=name, email=email, password=password, website=website, affiliation=affiliation, country=country, countries=countries)
+            return render_template('register.html', errors=errors, name=name, email=email, password=password, password_confirm=password_confirm, website=website, affiliation=affiliation, country=country, countries=countries)
         else:
             with app.app_context():
                 team = Teams(name, email.lower(), password, website, affiliation, country)
