@@ -76,6 +76,7 @@ def admin_config():
         mail_password = set_config("mail_password", request.form.get('mail_password', None))
 
         ctf_name = set_config("ctf_name", request.form.get('ctf_name', None))
+        flag_format = set_config("flag_format", request.form.get('flag_format', None))
         ctf_theme = set_config("ctf_theme", request.form.get('ctf_theme', None))
 
         mailfrom_addr = set_config("mailfrom_addr", request.form.get('mailfrom_addr', None))
@@ -102,6 +103,7 @@ def admin_config():
     with app.app_context():
         cache.clear()
     ctf_name = get_config('ctf_name')
+    flag_format = get_config('flag_format')
     ctf_theme = get_config('ctf_theme')
     max_tries = get_config('max_tries')
 
@@ -138,6 +140,7 @@ def admin_config():
 
     return render_template('admin/config.html',
                            ctf_name=ctf_name,
+                           flag_format=flag_format,
                            ctf_theme_config=ctf_theme,
                            start=start,
                            end=end,

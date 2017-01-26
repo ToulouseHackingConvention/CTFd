@@ -33,6 +33,9 @@ def setup():
             ctf_name = request.form['ctf_name']
             ctf_name = set_config('ctf_name', ctf_name)
 
+            flag_format = request.form['flag_format']
+            flag_format = set_config('flag_format', flag_format)
+
             # CSS
             css = set_config('start', '')
 

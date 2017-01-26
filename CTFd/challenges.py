@@ -2,6 +2,7 @@ import json
 import logging
 import operator
 import re
+import six
 import time
 
 from flask import render_template, request, redirect, jsonify, url_for, session, Blueprint
@@ -148,6 +149,21 @@ def who_solved(chalid):
     return jsonify(json)
 
 
+def normalize_key(key):
+    key = six.text_type(key.strip().lower())
+    flag_format = get_config('flag_format')
+
+    if flag_format:
+        match = re.match('^%s$' % flag_format.strip('^$'), key, re.IGNORECASE)
+        if match:
+            try:
+                key = match.group('flag')
+            except IndexError:
+                pass # the flag format does not contain (?P<flag>...)
+
+    return key
+
+
 @challenges.route('/chal/<int:chalid>', methods=['POST'])
 def chal(chalid):
     if ctf_ended() and not view_after_ctf():
@@ -176,7 +192,7 @@ def chal(chalid):
         # Challenge not solved yet
         if not solves:
             chal = Challenges.query.filter_by(id=chalid).first_or_404()
-            key = unicode(request.form['key'].strip().lower())
+            key = normalize_key(request.form['key'])
             keys = json.loads(chal.flags)
 
             # Hit max attempts
@@ -189,8 +205,7 @@ def chal(chalid):
 
             for x in keys:
                 if x['type'] == 0: # static key
-                    print(x['flag'], key.strip().lower())
-                    if x['flag'] and x['flag'].strip().lower() == key.strip().lower():
+                    if x['flag'] and normalize_key(x['flag']) == key:
                         if ctftime():
                             solve = Solves(chalid=chalid, teamid=session['id'], ip=get_ip(), flag=key)
                             db.session.add(solve)
@@ -200,8 +215,7 @@ def chal(chalid):
                         # return '1' # key was correct
                         return jsonify({'status': '1', 'message': 'Correct'})
                 elif x['type'] == 1: # regex
-                    res = re.match(x['flag'], key, re.IGNORECASE)
-                    if res and res.group() == key:
+                    if x['flag'] and re.match('^%s$' % x['flag'].strip('^$'), key, re.IGNORECASE):
                         if ctftime():
                             solve = Solves(chalid=chalid, teamid=session['id'], ip=get_ip(), flag=key)
                             db.session.add(solve)
