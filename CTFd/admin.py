@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from CTFd.utils import admins_only, is_admin, unix_time, get_config, \
     set_config, sendmail, rmdir, create_image, delete_image, run_image, container_status, container_ports, \
     container_stop, container_start, get_themes, cache
-from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Config, DatabaseError, score_by_team, get_solves_and_value
+from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Announcements, Config, DatabaseError, score_by_team, get_solves_and_value
 from CTFd import countries
 
 admin = Blueprint('admin', __name__)
@@ -777,7 +777,7 @@ def admin_create_chal():
     files = request.files.getlist('files[]')
 
     # TODO: Expand to support multiple flags
-    flags = [{'flag': request.form['key'], 'type':int(request.form['key_type[0]'])}]
+    flags = [{'flag': request.form['key'], 'type': int(request.form['key_type[0]'])}]
 
     # Create challenge
     chal = Challenges(request.form['name'], request.form['desc'], request.form['value'], request.form['category'], flags)
@@ -812,6 +812,7 @@ def admin_create_chal():
 @admins_only
 def admin_delete_chal():
     challenge = Challenges.query.filter_by(id=request.form['id']).first_or_404()
+    Announcements.query.filter_by(chalid=challenge.id).delete()
     WrongKeys.query.filter_by(chalid=challenge.id).delete()
     Solves.query.filter_by(chalid=challenge.id).delete()
     Keys.query.filter_by(chal=challenge.id).delete()
@@ -840,3 +841,63 @@ def admin_update_chal():
     db.session.commit()
     db.session.close()
     return redirect(url_for('admin.admin_chals'))
+
+
+@admin.route('/admin/announcements')
+@admins_only
+def admin_announcements():
+    announcements = Announcements.query.join(Challenges, Announcements.chalid == Challenges.id, isouter=True).order_by(Announcements.date.desc()).all()
+    challenges = Challenges.query.order_by(Challenges.name.asc()).all()
+    return render_template('admin/announcements.html', announcements=announcements, challenges=challenges)
+
+
+@admin.route('/admin/announcement/<int:announcement_id>')
+@admins_only
+def admin_announcement(announcement_id):
+    announcement = Announcements.query.filter_by(id=announcement_id).first_or_404()
+    return jsonify({
+        'id': announcement.id,
+        'title': announcement.title,
+        'description': announcement.description,
+        'chalid': announcement.chalid,
+    })
+
+
+@admin.route('/admin/announcement/new', methods=['POST'])
+@admins_only
+def admin_create_announcement():
+    if request.form.get('challenge'):
+        challenge = Challenges.query.filter_by(id=request.form['challenge']).first_or_404()
+    else:
+        challenge = None
+
+    announcement = Announcements(request.form['title'], request.form['desc'], challenge)
+    db.session.add(announcement)
+    db.session.commit()
+    return redirect(url_for('admin.admin_announcements'))
+
+
+@admin.route('/admin/announcement/update', methods=['POST'])
+@admins_only
+def admin_update_announcement():
+    announcement = Announcements.query.filter_by(id=request.form['id']).first_or_404()
+    announcement.title = request.form['title']
+    announcement.description = request.form['desc']
+
+    if request.form.get('challenge'):
+        challenge = Challenges.query.filter_by(id=request.form['challenge']).first_or_404()
+        announcement.chalid = challenge.id
+    else:
+        announcement.chalid = None
+
+    db.session.add(announcement)
+    db.session.commit()
+    return redirect(url_for('admin.admin_announcements'))
+
+
+@admin.route('/admin/announcement/delete', methods=['POST'])
+@admins_only
+def admin_delete_announcement():
+    Announcements.query.filter_by(id=request.form['id']).delete()
+    db.session.commit()
+    return redirect(url_for('admin.admin_announcements'))

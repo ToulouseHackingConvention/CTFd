@@ -207,6 +207,7 @@ class Teams(db.Model):
 
     def __repr__(self):
         return '<team %r>' % self.name
+
     def score(self):
         """Score for the team, dynamically computed."""
         return score_by_team()[self]
@@ -280,6 +281,26 @@ class Tracking(db.Model):
 
     def __repr__(self):
         return '<ip %r>' % self.team
+
+
+class Announcements(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(80))
+    description = db.Column(db.Text)
+    chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'), nullable=True)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    chal = db.relationship('Challenges', foreign_keys='Announcements.chalid', lazy='joined')
+
+    def __init__(self, title, description, challenge=None):
+        self.title = title
+        self.description = description
+        if challenge:
+            self.chalid = challenge.id
+        else:
+            self.chalid = None
+
+    def __repr__(self):
+        return '<announcement %s>' % self.title
 
 
 class Config(db.Model):
