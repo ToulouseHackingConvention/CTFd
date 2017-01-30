@@ -49,7 +49,7 @@ def chals():
             if view_after_ctf():
                 pass
             else:
-                return redirect(url_for('views.static_html'))
+                return redirect(url_for('views.index'))
     if user_can_view_challenges() and (ctf_started() or is_admin()):
         chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).add_columns('id', 'name', 'value', 'description', 'category').order_by(Challenges.value).all()
 

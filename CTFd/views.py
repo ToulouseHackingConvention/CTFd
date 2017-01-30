@@ -7,7 +7,7 @@ from passlib.hash import bcrypt_sha256
 
 from CTFd.utils import authed, is_setup, validate_url, get_config, set_config, sha512, cache, ctftime, view_after_ctf, ctf_started, \
     is_admin
-from CTFd.models import db, Teams, Solves, Awards, Files, Pages, get_solves_and_value
+from CTFd.models import db, Challenges, Teams, Solves, Awards, Files, Pages, Announcements, get_solves_and_value
 from CTFd import countries
 
 views = Blueprint('views', __name__)
@@ -48,16 +48,16 @@ def setup():
             admin.banned = True
 
             # Index page
-            page = Pages('index', """<div class="container main-container">
+            page = Pages('index', """
     <img class="logo" src="{0}/static/original/img/logo.png" />
+
     <h3 class="text-center">
         Welcome to a cool CTF framework written by <a href="https://github.com/ColdHeat">Kevin Chung</a> of <a href="https://github.com/isislab">@isislab</a>
     </h3>
 
     <h4 class="text-center">
         <a href="{0}/admin">Click here</a> to login and setup your CTF
-    </h4>
-</div>""".format(request.script_root))
+    </h4>""".format(request.script_root))
 
             # max attempts per challenge
             max_tries = set_config("max_tries", 0)
@@ -91,9 +91,9 @@ def setup():
             app.setup = False
             with app.app_context():
                 cache.clear()
-            return redirect(url_for('views.static_html'))
+            return redirect(url_for('views.index'))
         return render_template('setup.html', nonce=session.get('nonce'))
-    return redirect(url_for('views.static_html'))
+    return redirect(url_for('views.index'))
 
 
 # Custom CSS handler
@@ -102,8 +102,17 @@ def custom_css():
     return Response(get_config("css"), mimetype='text/css')
 
 
+@views.route('/')
+def index():
+    announcements = Announcements.query.join(Challenges, Announcements.chalid == Challenges.id, isouter=True).order_by(Announcements.date.desc()).all()
+
+    page = Pages.query.filter_by(route='index').first()
+    content = page.html if page else ''
+
+    return render_template('index.html', announcements=announcements, content=content)
+
+
 # Static HTML files
-@views.route("/", defaults={'template': 'index'})
 @views.route("/<template>")
 def static_html(template):
     try:

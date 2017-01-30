@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container main-container">
+    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/vendor/marked.min.js"></script>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            {% for announcement in announcements %}
+            <div class="panel panel-theme">
+                <div class="panel-heading clearfix">
+                    <h3 class="panel-title pull-left">
+                        {% if announcement.chal %}
+                            [HINT] {{ announcement.chal.name }}: {{ announcement.title }}
+                        {% else %}
+                             {{ announcement.title }}
+                        {% endif %}
+                    </h3>
+                    <div class="pull-right">
+                        <script>document.write(moment({{ announcement.date|unix_time_millis }}).local().format('MMMM Do, h:mm:ss A'))</script>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <script>document.write(marked({{ announcement.description|tojson }}, {'gfm': true, 'breaks': true}));</script>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {{ content | safe }}
+</div>
+{% endblock %}
