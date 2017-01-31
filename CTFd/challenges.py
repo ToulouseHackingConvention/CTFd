@@ -9,7 +9,7 @@ from flask import render_template, request, redirect, jsonify, url_for, session,
 from sqlalchemy.sql import or_
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name
-from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, get_solves_and_value
+from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, Announcements, get_solves_and_value
 
 challenges = Blueprint('challenges', __name__)
 
@@ -51,13 +51,24 @@ def chals():
             else:
                 return redirect(url_for('views.index'))
     if user_can_view_challenges() and (ctf_started() or is_admin()):
-        chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).add_columns('id', 'name', 'value', 'description', 'category').order_by(Challenges.value).all()
+        chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
 
         json = {'game': []}
-        for x in chals:
-            tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=x[1]).all()]
-            files = [str(f.location) for f in Files.query.filter_by(chal=x.id).all()]
-            json['game'].append({'id': x[1], 'name': x[2], 'value': x[3], 'description': x[4], 'category': x[5], 'files': files, 'tags': tags})
+        for chal in chals:
+            tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=chal.id).all()]
+            files = [str(f.location) for f in Files.query.filter_by(chal=chal.id).all()]
+            hints = [{'title': hint.title, 'description': hint.description}
+                     for hint in Announcements.query.filter_by(chalid=chal.id).order_by(Announcements.date.asc()).all()]
+            json['game'].append({
+                'id': chal.id,
+                'name': chal.name,
+                'value': chal.value,
+                'description': chal.description,
+                'category': chal.category,
+                'files': files,
+                'tags': tags,
+                'hints': hints,
+            })
 
         db.session.close()
         return jsonify(json)

@@ -20,12 +20,21 @@ function updateChalWindow(obj) {
     window.location.replace(window.location.href.split('#')[0] + '#' + obj.name);
     var chal = $('#chal-window');
     chal.find('.chal-name').text(obj.name);
-    chal.find('.chal-desc').html(marked(obj.description, {'gfm':true, 'breaks':true}));
+    chal.find('.chal-desc').html(marked(obj.description, {'gfm': true, 'breaks': true}));
+
+    chal.find('.chal-hints').empty();
+    for (var i = 0; i < obj.hints.length; i++) {
+      var hint = obj.hints[i];
+      var div = $(marked(hint.description, {'gfm': true, 'breaks': true}));
+      div.prepend('<span class="label label-primary">HINT</span> ');
+      chal.find('.chal-hints').append(div);
+    }
+
     chal.find('.chal-files').empty();
     for (var i = 0; i < obj.files.length; i++) {
         var filename = obj.files[i].split('/');
         filename = filename[filename.length - 1];
-        $('#chal-window').find('.chal-files').append("<div class='col-md-3 file-button-wrapper'><a class='file-button' href='" + script_root + '/files/' + obj.files[i] + "'><label class='challenge-wrapper file-wrapper hide-text'>" + filename + "</label></a></div>")
+        chal.find('.chal-files').append("<div class='col-md-3 file-button-wrapper'><a class='file-button' href='" + script_root + '/files/' + obj.files[i] + "'><label class='challenge-wrapper file-wrapper hide-text'>" + filename + "</label></a></div>");
     }
 
     var tags = chal.find('.chal-tags');
