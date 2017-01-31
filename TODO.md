@@ -17,7 +17,7 @@ Liste des changements à faire, par ordre de priorité.
 
 ## Optionnel
 
-- [ ] On doit pouvoir ajouter une mention « down » à un challenge. Facultatif, puisqu'il suffirait de renommer le challenge avec un tag [DOWN] et/ou de modifier la description.
+- [X] On doit pouvoir ajouter une mention « down » à un challenge. Facultatif, puisqu'il suffirait de renommer le challenge avec un tag [DOWN] et/ou de modifier la description.
 - [ ] La page de classement devra être dynamique et se mettre à jour sans action de l'utilisateur.
 - [ ] Ajouter un champ de soumission des flags global (non spécifique à un challenge)
 - [ ] Le classement doit pouvoir être masqué ou figé par les organisateurs
