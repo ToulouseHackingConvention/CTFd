@@ -283,7 +283,7 @@ def new_container():
 @admins_only
 def admin_chals():
     if request.method == 'POST':
-        chals = Challenges.query.add_columns('id', 'name', 'value', 'description', 'category', 'hidden').order_by(Challenges.value).all()
+        chals = Challenges.query.order_by(Challenges.value).all()
 
         teams_with_points = db.session.query(Solves.teamid).join(Teams).filter(
             Teams.banned == False).group_by(Solves.teamid).count()
@@ -291,7 +291,7 @@ def admin_chals():
         json_data = {'game': []}
         for x in chals:
             solve_count = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(
-                Solves.chalid == x[1], Teams.banned == False).count()
+                Solves.chalid == x.id, Teams.banned == False).count()
             if teams_with_points > 0:
                 percentage = (float(solve_count) / float(teams_with_points))
             else:
@@ -304,6 +304,7 @@ def admin_chals():
                 'description': x.description,
                 'category': x.category,
                 'hidden': x.hidden,
+                'down': x.down,
                 'percentage_solved': percentage
             })
 
@@ -781,10 +782,7 @@ def admin_create_chal():
 
     # Create challenge
     chal = Challenges(request.form['name'], request.form['desc'], request.form['value'], request.form['category'], flags)
-    if 'hidden' in request.form:
-        chal.hidden = True
-    else:
-        chal.hidden = False
+    chal.hidden = 'hidden' in request.form
     db.session.add(chal)
     db.session.commit()
 
@@ -837,6 +835,7 @@ def admin_update_chal():
     challenge.value = request.form['value']
     challenge.category = request.form['category']
     challenge.hidden = 'hidden' in request.form
+    challenge.down = 'down' in request.form
     db.session.add(challenge)
     db.session.commit()
     db.session.close()

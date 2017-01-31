@@ -22,6 +22,10 @@ function updateChalWindow(obj) {
     chal.find('.chal-name').text(obj.name);
     chal.find('.chal-desc').html(marked(obj.description, {'gfm': true, 'breaks': true}));
 
+    if (obj.down) {
+      chal.find('.chal-desc').append('<span class="label label-default">DOWN</span> This challenge is currently down.');
+    }
+
     chal.find('.chal-hints').empty();
     for (var i = 0; i < obj.hints.length; i++) {
       var hint = obj.hints[i];
@@ -213,6 +217,10 @@ function loadchals() {
             chalbutton.append(chalheader);
             chalbutton.append(chalscore);
             chalwrap.append(chalbutton);
+
+            if (chalinfo.down) {
+              chalbutton.addClass('down-challenge');
+            }
 
             $("#"+ catid +"-row").find(".category-challenges > .chal-row").append(chalwrap);
         };

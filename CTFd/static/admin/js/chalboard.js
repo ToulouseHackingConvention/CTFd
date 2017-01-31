@@ -34,10 +34,8 @@ function loadchal(id, update) {
     $('.chal-value').val(obj.value);
     $('.chal-category').val(obj.category);
     $('.chal-id').val(obj.id);
-    $('.chal-hidden').prop('checked', false);
-    if (obj.hidden) {
-        $('.chal-hidden').prop('checked', true);
-    }
+    $('.chal-hidden').prop('checked', obj.hidden);
+    $('.chal-down').prop('checked', obj.down);
     //$('#update-challenge .chal-delete').attr({
     //    'href': '/admin/chal/close/' + (id + 1)
     //})
@@ -172,6 +170,9 @@ function loadchals(){
         for (var i = 0; i <= challenges['game'].length - 1; i++) {
             var chal = challenges['game'][i]
             var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
+            if (chal.down) {
+                chal_button.addClass('down-challenge');
+            }
             $('#' + challenges['game'][i].category.replace(/ /g,"-").hashCode()).append(chal_button);
         };
 

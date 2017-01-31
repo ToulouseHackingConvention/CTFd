@@ -65,6 +65,7 @@ def chals():
                 'value': chal.value,
                 'description': chal.description,
                 'category': chal.category,
+                'down': chal.down,
                 'files': files,
                 'tags': tags,
                 'hints': hints,
@@ -203,6 +204,13 @@ def chal(chalid):
         # Challenge not solved yet
         if not solves:
             chal = Challenges.query.filter_by(id=chalid).first_or_404()
+
+            if chal.hidden:
+                return jsonify({'status': '0', 'message': 'You are not supposed to see this'})
+
+            if chal.down:
+                return jsonify({'status': '0', 'message': 'Challenge currently down'})
+
             key = normalize_key(request.form['key'])
             keys = json.loads(chal.flags)
 

@@ -109,7 +109,8 @@ class Challenges(db.Model):
     value = db.Column(db.Integer)
     category = db.Column(db.String(80))
     flags = db.Column(db.Text)
-    hidden = db.Column(db.Boolean)
+    hidden = db.Column(db.Boolean, default=False)
+    down = db.Column(db.Boolean, default=False)
 
     def __init__(self, name, description, value, category, flags):
         self.name = name
