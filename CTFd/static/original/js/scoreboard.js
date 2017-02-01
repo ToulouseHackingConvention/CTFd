@@ -78,7 +78,7 @@ function update(){
   scoregraph();
 }
 
-setInterval(update, 300000); // Update scores every 5 minutes
+setInterval(update, 60 * 1000); // update scores every minute
 scoregraph();
 
 window.onresize = function () {

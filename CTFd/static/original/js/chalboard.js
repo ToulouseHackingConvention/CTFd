@@ -298,4 +298,4 @@ $('#chal-window').on('hidden.bs.modal', function() {
     history.replaceState('', document.title, window.location.pathname);
 });
 
-setInterval(update, 300000);
+setInterval(update, 60 * 1000); // update challenges every minute
