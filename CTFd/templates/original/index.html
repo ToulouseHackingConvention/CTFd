@@ -11,9 +11,9 @@
                 <div class="panel-heading clearfix">
                     <h3 class="panel-title pull-left">
                         {% if announcement.chal %}
-                            [HINT] {{ announcement.chal.name }}: {{ announcement.title }}
+                            [HINT] {{ announcement.chal.name }}{% if announcement.title %}: {{ announcement.title }}{% endif %}
                         {% else %}
-                             {{ announcement.title }}
+                            {{ announcement.title }}
                         {% endif %}
                     </h3>
                     <div class="pull-right">
@@ -30,4 +30,19 @@
 
     {{ content | safe }}
 </div>
+
+<div id="alert-announcement" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="text-align: center">
+                <h3></h3>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/announcements.js"></script>
 {% endblock %}

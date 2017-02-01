@@ -97,6 +97,7 @@
         <h1>Challenges</h1>
     </div>
 </div>
+
 <div class="container main-container">
     <div id='challenges-board' class="row">
     </div>
@@ -159,11 +160,24 @@
         </div>
     </div>
 </div>
+
+<div id="alert-announcement" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="text-align: center">
+                <h3></h3>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 {% endif %}
 {% endblock %}
 
 {% block scripts %}
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/utils.js"></script>
+    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/announcements.js"></script>
     {% if not errors %}<script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/chalboard.js"></script>{% endif %}
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/style.js"></script>
 {% endblock %}

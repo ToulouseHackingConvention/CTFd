@@ -6,7 +6,7 @@ from jinja2.exceptions import TemplateNotFound
 from passlib.hash import bcrypt_sha256
 
 from CTFd.utils import authed, is_setup, validate_url, get_config, set_config, sha512, cache, ctftime, view_after_ctf, ctf_started, \
-    is_admin
+    is_admin, unix_time
 from CTFd.models import db, Challenges, Teams, Solves, Awards, Files, Pages, Announcements, get_solves_and_value
 from CTFd import countries
 
@@ -110,6 +110,30 @@ def index():
     content = page.html if page else ''
 
     return render_template('index.html', announcements=announcements, content=content)
+
+
+@views.route('/announcement/last')
+def last_announcement():
+    announcement = Announcements.query.join(Challenges, Announcements.chalid == Challenges.id, isouter=True).order_by(Announcements.date.desc()).first()
+
+    if not announcement:
+        return jsonify(False)
+    elif announcement.chalid:
+        return jsonify({
+            'type': 'hint',
+            'title': announcement.title,
+            'description': announcement.description,
+            'date': unix_time(announcement.date),
+            'chal_id': announcement.chal.id,
+            'chal_name': announcement.chal.name,
+        })
+    else:
+        return jsonify({
+            'type': 'announcement',
+            'title': announcement.title,
+            'description': announcement.description,
+            'date': unix_time(announcement.date),
+        })
 
 
 # Static HTML files
