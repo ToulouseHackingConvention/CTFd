@@ -1,9 +1,19 @@
 function updatescores () {
-  $.get(script_root + '/scores', function( data ) {
+  $.get(script_root + '/scores', function(data) {
     teams = $.parseJSON(JSON.stringify(data));
     $('#scoreboard > tbody').empty()
     for (var i = 0; i < teams['standings'].length; i++) {
-      row = "<tr><td>{0}</td><td><a href='/team/{1}'>{2}</a></td><td>{3}</td></tr>".format(i+1, teams['standings'][i].id, htmlentities(teams['standings'][i].team), teams['standings'][i].score)
+      var team = teams['standings'][i];
+      row = '<tr>';
+      row += '<td>' + (i+1) + '</td>';
+      row += '<td><a href="' + script_root + '/team/' + team.id + '">' + htmlentities(team.name) + '</a></td>';
+      if (team.country.length > 0) {
+        row += '<td><img src="' + script_root + '/static/original/img/flags/' + team.country + '.png"></td>';
+      } else {
+        row += '<td></td>';
+      }
+      row += '<td>' + team.score + '</td>';
+      row += '</tr>';
       $('#scoreboard > tbody').append(row)
     };
   });
@@ -22,6 +32,7 @@ function UTCtoDate(utc){
     d.setUTCSeconds(utc)
     return d;
 }
+
 function scoregraph () {
     $.get(script_root + '/top/10', function( data ) {
         var scores = $.parseJSON(JSON.stringify(data));

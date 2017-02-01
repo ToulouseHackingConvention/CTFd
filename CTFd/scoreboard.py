@@ -28,9 +28,10 @@ def scores():
     standings = [
         {'pos': i + 1,
          'id': team.id,
-         'team': team.name,
+         'name': team.name,
+         'country': team.country,
          'score': score}
-        for i, (team, score) in enumerate(score_by_team())
+        for i, (team, score) in enumerate(score_by_team().most_common())
     ]
     return jsonify({'standings': standings})
 
