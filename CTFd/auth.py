@@ -101,13 +101,13 @@ def register():
         return redirect(url_for('auth.login'))
     if request.method == 'POST':
         errors = []
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        password_confirm = request.form.get('password-confirm')
+        name = request.form.get('name', '')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+        password_confirm = request.form.get('password-confirm', '')
         website = request.form.get('website', '')
         affiliation = request.form.get('affiliation', '')
-        country = request.form.get('country')
+        country = request.form.get('country', '')
 
         if not name:
             errors.append('Pick a longer team name')
