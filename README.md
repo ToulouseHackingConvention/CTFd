@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/isislab/CTFd/master/CTFd/static/original/img/logo.png)
+![](https://raw.githubusercontent.com/ToulouseHackingConvention/CTFd/master/CTFd/static/original/img/logo.png)
 ====
 
 [![CTFd Slack](https://slack.ctfd.io/badge.svg)](https://slack.ctfd.io/)

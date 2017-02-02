@@ -52,12 +52,14 @@ def setup():
     <img class="logo" src="{0}/static/original/img/logo.png" />
 
     <h3 class="text-center">
-        Welcome to a cool CTF framework written by <a href="https://github.com/ColdHeat">Kevin Chung</a> of <a href="https://github.com/isislab">@isislab</a>
+        Welcome to the THC CTF 2017 !
     </h3>
 
-    <h4 class="text-center">
-        <a href="{0}/admin">Click here</a> to login and setup your CTF
-    </h4>""".format(request.script_root))
+    <br/>
+
+    <h6 class="text-center">
+        <a href="https://github.com/ToulouseHackingConvention/CTFd/">scoreboard</a> based on <a href="https://github.com/isislab/CTFd">CTFd</a> and modified by <a href="https://github.com/arthaud">maxima</a> and <a href="https://github.com/palkeo">palkeo</a>.
+    </h6>""".format(request.script_root))
 
             # max attempts per challenge
             max_tries = set_config("max_tries", 0)
