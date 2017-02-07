@@ -149,6 +149,7 @@
                             <a href="#" data-toggle="modal" data-target="#update-tags" class="btn btn-primary">Tags</a>
                             <a href="#" data-toggle="modal" data-target="#update-files" class="btn btn-primary">Files</a>
                             <a href="#" data-toggle="modal" data-target="#update-keys" class="btn btn-primary">Keys</a>
+                            <a href="#" data-toggle="modal" data-target="#show-feedbacks" class="btn btn-success">Feedbacks</a>
                             <a href="#" data-toggle="modal" data-target="#delete-chal" class="btn btn-danger">Delete</a>
                         </div>
                         <input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
@@ -230,6 +231,28 @@
         </div>
     </div>
 
+    <div id="show-feedbacks" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h3>Feedbacks</h3>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-condensed table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>Team</th>
+                          <th>Feedback</th>
+                          <th>Mark</th>
+                        </tr>
+                      </thead>
+                      <tbody id="feedbacks_tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
     <div id="update-tags" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
