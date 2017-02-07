@@ -65,6 +65,7 @@ function updateChalWindow(obj) {
         $("#rateYo").rateYo("option", "rating", 3);
       }
       $("#rateYo").rateYo("option", "onSet", rate_chal);
+      $('#feedback').val(obj.feedback);
     } else {
       $('#set_mark')[0].className = "hidden";
     }
@@ -152,6 +153,7 @@ function marksolves(cb) {
 
             obj.is_solved = true;
             obj.mark      = solves['solves'][i].mark;
+            obj.feedback  = solves['solves'][i].feedback;
             $('button[value="' + id + '"]').removeClass('theme-background');
             $('button[value="' + id + '"]').addClass('solved-challenge');
         };
@@ -306,6 +308,7 @@ function updatenotepad(e) {
 
 window.addEventListener('load', function() {
   document.getElementById('notepad-submit').addEventListener('click', updatenotepad);
+  $('#submit_feedback')[0].addEventListener('submit', submit_feedback);
 });
 
 // $.distint(array)
@@ -349,6 +352,7 @@ $('#chal-window').on('hidden.bs.modal', function() {
 });
 
 
+
 function rate_chal(rating, instance) {
   var obj = $.grep(challenges['game'], function (e) {
                 return e.id == $('#chal-id').val();
@@ -373,6 +377,7 @@ function rate_chal(rating, instance) {
       dataType: 'json',
       success: function(json) {
         $('#rateOk').removeClass('hidden');
+        obj.mark  = rating;
         window.setTimeout(function() {
           $('#rateOk').addClass('hidden');
         }, 1000);
@@ -382,5 +387,53 @@ function rate_chal(rating, instance) {
     $.ajax(ajaxConfig);
   }
 }
+
+
+function submit_feedback(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var feedback, ajaxConfig;
+  feedback = e.target.elements.feedback.value.trim();
+  if (feedback == '') return;
+  var obj = $.grep(challenges['game'], function (e) {
+    return e.id == $('#chal-id').val();
+  })[0];
+  console.log(obj);
+  if (obj && obj.is_solved) {
+    ajaxConfig = {
+      url: '/rate/'+obj.id+'/feedback',
+      method: 'POST',
+      data: {
+        feedback: feedback,
+        nonce: $('[name=nonce]').val()
+      },
+      dataType: 'json',
+      success: function(json) {
+        if (!json.error) {
+          $('#submit_feedback_btn')[0].className = "btn btn-success btn-disabled";
+          $('#submit_feedback_btn')[0].disabled  = true;
+          $('#submit_feedback_btn')[0].innerHTML = 'Thanks!';
+          window.setTimeout(function() {
+            $('#submit_feedback_btn')[0].className  = "btn btn-success";
+            $('#submit_feedback_btn')[0].disabled   = false;
+            $('#submit_feedback_btn')[0].innerHTML  = 'Submit';
+          }, 1000);
+          obj.feedback  = feedback;
+        } else {
+          $('#submit_feedback_btn')[0].className  ="btn btn-danger btn-disabled";
+          $('#submit_feedback_btn')[0].disabled   = true;
+          $('#submit_feedback_btn')[0].innerHTML  = json.errstr;
+          window.setTimeout(function() {
+            $('#submit_feedback_btn')[0].className  = "btn btn-success";
+            $('#submit_feedback_btn')[0].disabled   = false;
+            $('#submit_feedback_btn')[0].innerHTML  = 'Submit';
+          }, 3000);
+        }
+      }
+    };
+    $.ajax(ajaxConfig);
+  }
+}
+
 
 setInterval(update, 300000);

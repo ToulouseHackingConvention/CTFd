@@ -106,9 +106,11 @@ def solves(teamid=None):
         if solve.teamid == session['id']:
           marks = Marks.query.filter_by(teamid=session['id'],chalid=solve.chalid).all()
           if marks:
-            mark = marks[0].mark
+            mark      = marks[0].mark
+            feedback  = marks[0].feedback
           else:
-            mark = None
+            mark      = None
+            feedback  = None
         json['solves'].append({
             'chal': solve.chal.name,
             'chalid': solve.chalid,
@@ -116,7 +118,8 @@ def solves(teamid=None):
             'value': solve.chal.value,
             'category': solve.chal.category,
             'time': unix_time(solve.date),
-            'mark':mark
+            'mark':mark,
+            'feedback': feedback
         })
     if awards:
         for award in awards:
@@ -272,25 +275,41 @@ def update_notepad(chalid):
   db.session.close()
   return jsonify({'error': False})
 
-@challenges.route('/rate/<chalid>', methods=['POST'])
+@challenges.route('/rate/<int:chalid>', methods=['POST'])
 def set_mark(chalid):
   mark = request.form['mark']
-  if re.match('^[0-5]$', mark) and re.match('^[0-9]+$', chalid):
-    mark  = int(mark)
-    chalid  = int(chalid)
-    solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
-    if solve:
-      entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
-      if not entry:
-        entry = Marks(session['id'], chalid, mark)
-      else:
-        entry = entry[0]
-        entry.mark   = mark
-      db.session.add(entry)
-      db.session.commit()
-      db.session.close()
-      return jsonify({'error':False})
+  mark  = int(mark)
+  chalid  = int(chalid)
+  solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+  if solve:
+    entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+    if not entry:
+      entry = Marks(session['id'], chalid, mark, '')
     else:
-      return jsonify({'error':True, 'errstr':'You have to solve this challenge before rate it.'})
+      entry = entry[0]
+      entry.mark   = mark
+    db.session.add(entry)
+    db.session.commit()
+    db.session.close()
+    return jsonify({'error':False})
   else:
-    return jsonify({'error':True, 'errstr':'Bad arguments.'})
+    return jsonify({'error':True, 'errstr':'You have to solve this challenge before rating it.'})
+
+@challenges.route('/rate/<int:chalid>/feedback', methods=['POST'])
+def submit_feedback(chalid):
+  feedback  = request.form['feedback'].strip()
+  solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+  if solve:
+    entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+    if not entry:
+      entry = Marks(session['id'], chalid, 3, feedback)
+    else:
+      entry = entry[0]
+      entry.feedback   = feedback
+    db.session.add(entry)
+    db.session.commit()
+    db.session.close()
+    return jsonify({'error':False})
+  else:
+    return jsonify({'error':True, 'errstr':'You have to solve this challenge before writing a feedback.'})
+
