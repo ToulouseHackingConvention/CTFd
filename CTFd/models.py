@@ -262,13 +262,14 @@ class Notepads(db.Model):
 
 
 class Marks(db.Model):
-  id        = db.Column(db.Integer, primary_key=True)
-  teamid    = db.Column(db.Integer, db.ForeignKey('teams.id'))
-  chalid    = db.Column(db.Integer, db.ForeignKey('challenges.id'))
-  mark      = db.Column(db.Integer)
-  feedback  = db.Column(db.Text)
-  def __init__(self, teamid, chalid, mark, feedback):
-    self.teamid   = teamid
-    self.chalid   = chalid
-    self.mark     = mark
-    self.feedback = feedback
+    id = db.Column(db.Integer, primary_key=True)
+    teamid = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
+    mark = db.Column(db.Integer)
+    feedback = db.Column(db.Text)
+
+    def __init__(self, teamid, chalid, mark, feedback):
+        self.teamid = teamid
+        self.chalid = chalid
+        self.mark = mark
+        self.feedback = feedback

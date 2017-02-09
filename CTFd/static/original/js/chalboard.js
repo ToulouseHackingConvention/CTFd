@@ -428,5 +428,4 @@ function submit_feedback(e) {
   }
 }
 
-
 setInterval(update, 300000);

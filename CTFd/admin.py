@@ -288,20 +288,24 @@ def admin_chals():
 
         json_data = {'game': []}
         for x in chals:
-            marks       = Marks.query.filter_by(chalid=x.id).all()
-            feedbacks   = []
-            average     = 0
+            marks = Marks.query.filter_by(chalid=x.id).all()
+            feedbacks = []
+            average = 0
+
             for m in marks:
-              average += m.mark
-              if m.feedback:
-                teamname = Teams.query.filter_by(id=m.teamid).all()[0].name
-                feedbacks.append({'teamid':m.teamid, 'mark':m.mark, 'teamname':teamname, 'feedback':m.feedback})
-            if len(marks) == 0:
-              average = 3
+                average += m.mark
+                if m.feedback:
+                    teamname = Teams.query.filter_by(id=m.teamid).all()[0].name
+                    feedbacks.append({'teamid': m.teamid, 'mark': m.mark, 'teamname': teamname, 'feedback': m.feedback})
+
+            if not marks:
+                average = 3
             else:
-              average = round(average / len(marks), 1)
+                average = round(average / len(marks), 1)
+
             solve_count = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(
                 Solves.chalid == x[1], Teams.banned == False).count()
+
             if teams_with_points > 0:
                 percentage = (float(solve_count) / float(teams_with_points))
             else:
@@ -311,8 +315,8 @@ def admin_chals():
                 'id': x.id,
                 'name': x.name,
                 'value': x.value,
-                'average_marks':average,
-                'feedbacks':feedbacks,
+                'average_marks': average,
+                'feedbacks': feedbacks,
                 'description': x.description,
                 'category': x.category,
                 'hidden': x.hidden,

@@ -27,7 +27,6 @@ function loadchal(id, update) {
     obj = $.grep(challenges['game'], function (e) {
         return e.id == id;
     })[0];
-    console.log(obj);
     $('#desc-write-link').click() // Switch to Write tab
     $('.chal-title').text(obj.name);
     $('.chal-name').val(obj.name);
@@ -40,20 +39,20 @@ function loadchal(id, update) {
         $('.chal-hidden').prop('checked', true);
     }
     if (obj.feedbacks.length != 0) {
-      $('#feedbacks_tbody').html('');
-      obj.feedbacks.map(function(f, i) {
-        let tr              = document.createElement('tr');
-        let team            = document.createElement('td');
-        let feedback        = document.createElement('td');
-        let mark            = document.createElement('td');
-        team.innerHTML      = f.teamname;
-        feedback.appendChild(document.createTextNode(f.feedback));
-        mark.innerHTML      = f.mark;
-        tr.appendChild(team);
-        tr.appendChild(feedback);
-        tr.appendChild(mark);
-        $('#feedbacks_tbody')[0].appendChild(tr);
-      });
+        $('#feedbacks_tbody').html('');
+        obj.feedbacks.map(function(f, i) {
+            let tr = document.createElement('tr');
+            let team = document.createElement('td');
+            let feedback = document.createElement('td');
+            let mark = document.createElement('td');
+            team.innerHTML = f.teamname;
+            feedback.appendChild(document.createTextNode(f.feedback));
+            mark.innerHTML = f.mark;
+            tr.appendChild(team);
+            tr.appendChild(feedback);
+            tr.appendChild(mark);
+            $('#feedbacks_tbody')[0].appendChild(tr);
+        });
     }
     //$('#update-challenge .chal-delete').attr({
     //    'href': '/admin/chal/close/' + (id + 1)
