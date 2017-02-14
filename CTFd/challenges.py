@@ -114,7 +114,7 @@ def solves(teamid=None):
                 'time': unix_time(solve.date),
             }
 
-            if solve.teamid == session['id']:
+            if isinstance(solve, Solves) and solve.teamid == session['id']:
                 mark = Marks.query.filter_by(teamid=session['id'], chalid=solve.chalid).first()
                 if mark:
                     j.update({'mark': mark.mark, 'feedback': mark.feedback})

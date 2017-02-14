@@ -52,6 +52,21 @@ function loadchal(id, update) {
             $('#feedbacks_tbody')[0].appendChild(tr);
         });
     }
+    if (obj.notepads.length != 0) {
+        $('#notepads_tbody').html('');
+        obj.notepads.map(function(f, i) {
+            let tr = document.createElement('tr');
+            let team = document.createElement('td');
+            let content = document.createElement('td');
+            content.className="notepad-content";
+            team.innerHTML = f.teamname;
+            content.appendChild(document.createTextNode(f.content));
+            tr.appendChild(team);
+            tr.appendChild(content);
+            $('#notepads_tbody')[0].appendChild(tr);
+        });
+    }
+
     //$('#update-challenge .chal-delete').attr({
     //    'href': '/admin/chal/close/' + (id + 1)
     //})

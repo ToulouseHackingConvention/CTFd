@@ -158,6 +158,17 @@ function marksolves(cb) {
             })[0];
 
             obj.is_solved = true;
+            obj.mark      = 3;
+            $('#set_mark')[0].className = "show";
+            $("#rateYo").rateYo("option", "onSet", null);
+            if (obj.mark) {
+              $("#rateYo").rateYo("option", "rating", obj.mark);
+            } else {
+              $("#rateYo").rateYo("option", "rating", 3);
+            }
+            $("#rateYo").rateYo("option", "onSet", rate_chal);
+            $('#feedback').val(obj.feedback);
+
             obj.mark      = solves['solves'][i].mark;
             obj.feedback  = solves['solves'][i].feedback;
             $('button[value="' + id + '"]').removeClass('theme-background');
@@ -293,6 +304,10 @@ function updatenotepad(e) {
         data: {content:content, nonce:nonce},
         success: function(json) {
           if (!json.error) {
+              var obj = $.grep(challenges['game'], function (e) {
+                return e.id == $('#chal-id').val();
+              })[0];
+              obj.notepad = content;
               $('#notepad-submit').html('Saved!');
               $('#notepad-submit').removeClass('btn-default');
               $('#notepad-submit').addClass('btn-success');

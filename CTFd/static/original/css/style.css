@@ -380,4 +380,8 @@ table{
   text-align: left;
 }
 
+#submit_feedback_btn {
+  display: block;
+  margin: 0.3em auto;
+}
 /* END OF INPUT CSS */

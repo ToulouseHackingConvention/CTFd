@@ -487,3 +487,7 @@ table{
 .remove-key{
     float:right;
 }
+
+.notepad-content {
+  white-space: pre-wrap;
+}
