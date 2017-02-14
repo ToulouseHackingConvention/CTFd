@@ -289,16 +289,19 @@ def admin_chals():
             Teams.banned == False).group_by(Solves.teamid).count()
 
         json_data = {'game': []}
-        for x in chals:
-            marks = Marks.query.filter_by(chalid=x.id).all()
+        for chal in chals:
+            marks = Marks.query.join(Teams).filter(Marks.chalid == chal.id).all()
             feedbacks = []
             average = 0
 
             for m in marks:
                 average += m.mark
-                if m.feedback:
-                    teamname = Teams.query.filter_by(id=m.teamid).all()[0].name
-                    feedbacks.append({'teamid': m.teamid, 'mark': m.mark, 'teamname': teamname, 'feedback': m.feedback})
+                feedbacks.append({
+                    'teamid': m.teamid,
+                    'mark': m.mark,
+                    'teamname': m.team.name,
+                    'feedback': m.feedback or '',
+                })
 
             if not marks:
                 average = 3
@@ -306,23 +309,23 @@ def admin_chals():
                 average = round(average / len(marks), 1)
 
             solve_count = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(
-                Solves.chalid == x.id, Teams.banned == False).count()
+                Solves.chalid == chal.id, Teams.banned == False).count()
 
             if teams_with_points > 0:
-                percentage = (float(solve_count) / float(teams_with_points))
+                percentage = float(solve_count) / float(teams_with_points)
             else:
                 percentage = 0.0
 
             json_data['game'].append({
-                'id': x.id,
-                'name': x.name,
-                'value': x.value,
+                'id': chal.id,
+                'name': chal.name,
+                'value': chal.value,
                 'average_marks': average,
                 'feedbacks': feedbacks,
-                'description': x.description,
-                'category': x.category,
-                'hidden': x.hidden,
-                'down': x.down,
+                'description': chal.description,
+                'category': chal.category,
+                'hidden': chal.hidden,
+                'down': chal.down,
                 'percentage_solved': percentage
             })
 

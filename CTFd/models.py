@@ -132,7 +132,8 @@ class Awards(db.Model):
     value = db.Column(db.Integer)
     category = db.Column(db.String(80))
     icon = db.Column(db.Text)
-    team = db.relationship('Teams', foreign_keys="Awards.teamid", lazy='joined')
+
+    team = db.relationship('Teams', foreign_keys='Awards.teamid', lazy='joined')
 
     def __init__(self, teamid, name, value):
         self.teamid = teamid
@@ -238,16 +239,15 @@ class Solves(db.Model):
     ip = db.Column(db.Integer)
     flag = db.Column(db.Text)
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    team = db.relationship('Teams', foreign_keys="Solves.teamid", lazy='joined')
-    chal = db.relationship('Challenges', foreign_keys="Solves.chalid", lazy='joined')
-    # value = db.Column(db.Integer)
+
+    team = db.relationship('Teams', foreign_keys='Solves.teamid', lazy='joined')
+    chal = db.relationship('Challenges', foreign_keys='Solves.chalid', lazy='joined')
 
     def __init__(self, chalid, teamid, ip, flag):
         self.ip = ip2long(ip)
         self.chalid = chalid
         self.teamid = teamid
         self.flag = flag
-        # self.value = value
 
     def __repr__(self):
         return '<solves %r>' % self.chal
@@ -255,11 +255,13 @@ class Solves(db.Model):
 
 class WrongKeys(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     teamid = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     flag = db.Column(db.Text)
-    chal = db.relationship('Challenges', foreign_keys="WrongKeys.chalid", lazy='joined')
+
+    team = db.relationship('Teams', foreign_keys='WrongKeys.teamid', lazy='joined')
+    chal = db.relationship('Challenges', foreign_keys='WrongKeys.chalid', lazy='joined')
 
     def __init__(self, teamid, chalid, flag):
         self.teamid = teamid
@@ -290,6 +292,7 @@ class Announcements(db.Model):
     description = db.Column(db.Text)
     chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'), nullable=True)
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
     chal = db.relationship('Challenges', foreign_keys='Announcements.chalid', lazy='joined')
 
     def __init__(self, title, description, challenge=None):
@@ -320,13 +323,16 @@ class Notepads(db.Model):
     chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     content = db.Column(db.Text)
 
+    team = db.relationship('Teams', foreign_keys='Notepads.teamid', lazy='joined')
+    chal = db.relationship('Challenges', foreign_keys='Notepads.chalid', lazy='joined')
+
     def __init__(self, teamid, chalid, content):
         self.teamid = teamid
         self.chalid = chalid
         self.content = content
 
     def __repr__(self):
-        return "<Notepads %r>" % self.content
+        return '<Notepads %r>' % self.content
 
 
 class Marks(db.Model):
@@ -335,6 +341,9 @@ class Marks(db.Model):
     chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     mark = db.Column(db.Integer)
     feedback = db.Column(db.Text)
+
+    team = db.relationship('Teams', foreign_keys='Marks.teamid', lazy='joined')
+    chal = db.relationship('Challenges', foreign_keys='Marks.chalid', lazy='joined')
 
     def __init__(self, teamid, chalid, mark, feedback):
         self.teamid = teamid

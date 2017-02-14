@@ -52,15 +52,14 @@ def chals():
                 return redirect(url_for('views.index'))
     if user_can_view_challenges() and (ctf_started() or is_admin()):
         chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
-        notepads = Notepads.query.filter_by(teamid=session['id'])
 
         json = {'game': []}
         for chal in chals:
-            tags = [tag.tag for tag in Tags.query.add_columns('tag').filter_by(chal=chal.id).all()]
+            tags = [tag.tag for tag in Tags.query.filter_by(chal=chal.id).all()]
             files = [str(f.location) for f in Files.query.filter_by(chal=chal.id).all()]
             hints = [{'title': hint.title, 'description': hint.description}
                      for hint in Announcements.query.filter_by(chalid=chal.id).order_by(Announcements.date.asc()).all()]
-            notepad = notepads.filter_by(chalid=chal.id).first()
+            notepad = Notepads.query.filter_by(teamid=session['id'], chalid=chal.id).first()
             notepad = notepad.content if notepad else ''
             json['game'].append({
                 'id': chal.id,
@@ -116,9 +115,9 @@ def solves(teamid=None):
             }
 
             if solve.teamid == session['id']:
-                marks = Marks.query.filter_by(teamid=session['id'], chalid=solve.chalid).all()
-                if marks:
-                    j.update({'mark': marks[0].mark, 'feedback': marks[0].feedback})
+                mark = Marks.query.filter_by(teamid=session['id'], chalid=solve.chalid).first()
+                if mark:
+                    j.update({'mark': mark.mark, 'feedback': mark.feedback})
                 else:
                     j.update({'mark': None, 'feedback': None})
 

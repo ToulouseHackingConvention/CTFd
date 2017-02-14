@@ -112,7 +112,7 @@ def register():
         if not name:
             errors.append('Pick a longer team name')
         else:
-            names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
+            names = Teams.query.filter_by(name=name).first()
             if names:
                 errors.append('That team name is already taken')
 
@@ -121,7 +121,7 @@ def register():
         elif not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
             errors.append("That email doesn't look right")
         else:
-            emails = Teams.query.add_columns('email', 'id').filter_by(email=email).first()
+            emails = Teams.query.filter_by(email=email).first()
             if emails:
                 errors.append('That email has already been used')
 

@@ -24,7 +24,7 @@ def create_app(config='CTFd.config.Config'):
         app.config.from_object(config)
         app.jinja_loader = ThemeLoader(os.path.join(app.root_path, app.template_folder), followlinks=True)
 
-        from CTFd.models import db, Teams, Solves, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Notepads
+        from CTFd.models import db
 
         url = make_url(app.config['SQLALCHEMY_DATABASE_URI'])
         if url.drivername == 'postgres':
@@ -38,8 +38,6 @@ def create_app(config='CTFd.config.Config'):
             db.create_all()
         except OperationalError:
             db.create_all()
-        except ProgrammingError:  ## Database already exists
-            pass
         else:
             db.create_all()
 
