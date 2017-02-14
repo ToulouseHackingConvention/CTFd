@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block stylesheets %}
+<link rel="stylesheet" href="{{ request.script_root }}/static/{{ ctf_theme() }}/css/vendor/jquery.rateyo.min.css" />
 <style>
     .hide-text { text-overflow: ellipsis; overflow: hidden; }
     .dialog-inner {padding-bottom: 30px;}
@@ -102,7 +103,6 @@
     <div id='challenges-board' class="row">
     </div>
 </div>
-
 <div class="modal fade" id="chal-window" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content content">
@@ -110,6 +110,7 @@
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#challenge" aria-controls="challenge" role="tab">Challenge</a></li>
                 <li role="presentation"><a href="#solves" aria-controls="solves" class="chal-solves" role="tab"></a></li>
+                <li role="presentation"><a href="#notepad" aria-controls="notepad" class="chal-notepad" role="tab">Team notepad</a></li>
             </ul>
             <div class="modal-body">
                 <div role="tabpanel">
@@ -139,6 +140,18 @@
                                   <strong id="result-message"></strong>
                                 </div>
                             </div>
+                            <div id="set_mark">
+                              <h4>Rate this challenge ! </h4>
+                              <div id="rateYo"></div>
+                              <div id="rateOk" style="display: block;" class="alert alert-success hidden">Your rate has been saved.</div>
+                              <form id="submit_feedback" class="form" action="" method="">
+                                <fieldset class="form-group">
+                                  <label for="feedback">Write us a feedback:</label>
+                                  <input class="form-control" name="feedback" id="feedback" type="text">
+                                  <button type="submit" id="submit_feedback_btn" class="btn btn-success">Submit</button>
+                                </fieldset>
+                              </form>
+                            </div> 
                         </div>
                         <div role="tabpanel" class="tab-pane fade" id="solves">
                             <table class="table table-striped">
@@ -153,6 +166,11 @@
                                 <tbody id="chal-solves-names">
                                 </tbody>
                             </table>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="notepad">
+                          <div class="alert alert-info show">You can write down notes here. Only members of your team can read them.</div>
+                          <textarea rows="10" id="notepad-content" class="form-control"></textarea><br>
+                          <button id="notepad-submit" type="button" class="btn btn-default">Save</button>
                         </div>
                     </div>
                 </div>
@@ -180,4 +198,23 @@
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/announcements.js"></script>
     {% if not errors %}<script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/chalboard.js"></script>{% endif %}
     <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/style.js"></script>
+    <script src="{{ request.script_root }}/static/{{ ctf_theme() }}/js/vendor/jquery.rateyo.min.js"></script>
+    <script>
+$(function () {
+ 
+  $("#rateYo").rateYo({
+    rating: 3,
+    spacing   : "5px",
+    fullStar: true,
+    onSet: rate_chal,
+    multiColor: {
+ 
+      "startColor": "#FF0000", //RED
+      "endColor"  : "#00FF00"  //GREEN
+    }
+
+  });
+ 
+}); 
+    </script>
 {% endblock %}

@@ -26,7 +26,7 @@ function loadchal(id, update) {
     // $('#chal > h1').hide()
     obj = $.grep(challenges['game'], function (e) {
         return e.id == id;
-    })[0]
+    })[0];
     $('#desc-write-link').click() // Switch to Write tab
     $('.chal-title').text(obj.name);
     $('.chal-name').val(obj.name);
@@ -36,6 +36,22 @@ function loadchal(id, update) {
     $('.chal-id').val(obj.id);
     $('.chal-hidden').prop('checked', obj.hidden);
     $('.chal-down').prop('checked', obj.down);
+    if (obj.feedbacks.length != 0) {
+        $('#feedbacks_tbody').html('');
+        obj.feedbacks.map(function(f, i) {
+            let tr = document.createElement('tr');
+            let team = document.createElement('td');
+            let feedback = document.createElement('td');
+            let mark = document.createElement('td');
+            team.innerHTML = f.teamname;
+            feedback.appendChild(document.createTextNode(f.feedback));
+            mark.innerHTML = f.mark;
+            tr.appendChild(team);
+            tr.appendChild(feedback);
+            tr.appendChild(mark);
+            $('#feedbacks_tbody')[0].appendChild(tr);
+        });
+    }
     //$('#update-challenge .chal-delete').attr({
     //    'href': '/admin/chal/close/' + (id + 1)
     //})
@@ -169,7 +185,7 @@ function loadchals(){
 
         for (var i = 0; i <= challenges['game'].length - 1; i++) {
             var chal = challenges['game'][i]
-            var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100)));
+            var chal_button = $('<button class="chal-button col-md-2 theme-background" value="{0}"><h5>{1}</h5><p class="chal-points">{2}</p><span class="chal-percent">{3}% solved</span><span class="chal-average-marks"><b>{4}/5</b> average marks</span></button>'.format(chal.id, chal.name, chal.value, Math.round(chal.percentage_solved * 100), chal.average_marks));
             if (chal.down) {
                 chal_button.addClass('down-challenge');
             }

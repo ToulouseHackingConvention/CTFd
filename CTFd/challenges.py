@@ -9,7 +9,7 @@ from flask import render_template, request, redirect, jsonify, url_for, session,
 from sqlalchemy.sql import or_
 
 from CTFd.utils import ctftime, view_after_ctf, authed, unix_time, get_kpm, user_can_view_challenges, is_admin, get_config, get_ip, is_verified, ctf_started, ctf_ended, ctf_name
-from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, Announcements, get_solves_and_value
+from CTFd.models import db, Challenges, Files, Solves, WrongKeys, Tags, Teams, Awards, Announcements, Notepads, Marks, get_solves_and_value
 
 challenges = Blueprint('challenges', __name__)
 
@@ -52,6 +52,7 @@ def chals():
                 return redirect(url_for('views.index'))
     if user_can_view_challenges() and (ctf_started() or is_admin()):
         chals = Challenges.query.filter(or_(Challenges.hidden != True, Challenges.hidden == None)).order_by(Challenges.value).all()
+        notepads = Notepads.query.filter_by(teamid=session['id'])
 
         json = {'game': []}
         for chal in chals:
@@ -59,6 +60,8 @@ def chals():
             files = [str(f.location) for f in Files.query.filter_by(chal=chal.id).all()]
             hints = [{'title': hint.title, 'description': hint.description}
                      for hint in Announcements.query.filter_by(chalid=chal.id).order_by(Announcements.date.asc()).all()]
+            notepad = notepads.filter_by(chalid=chal.id).first()
+            notepad = notepad.content if notepad else ''
             json['game'].append({
                 'id': chal.id,
                 'name': chal.name,
@@ -69,6 +72,7 @@ def chals():
                 'files': files,
                 'tags': tags,
                 'hints': hints,
+                'notepad': notepad,
             })
 
         db.session.close()
@@ -110,6 +114,14 @@ def solves(teamid=None):
                 'value': value,
                 'time': unix_time(solve.date),
             }
+
+            if solve.teamid == session['id']:
+                marks = Marks.query.filter_by(teamid=session['id'], chalid=solve.chalid).all()
+                if marks:
+                    j.update({'mark': marks[0].mark, 'feedback': marks[0].feedback})
+                else:
+                    j.update({'mark': None, 'feedback': None})
+
             if isinstance(solve, Solves):
                 j['chalid'] = solve.chalid
                 j['chal'] = solve.chal.name
@@ -267,3 +279,61 @@ def chal(chalid):
             return jsonify({'status': '2', 'message': 'You already solved this'})
     else:
         return '-1'
+
+
+@challenges.route('/chal/<chalid>/notepad', methods=['POST'])
+def update_notepad(chalid):
+    if not authed() or not is_verified():
+        return jsonify({'error': True})
+
+    teamid = session['id']
+    content = request.form['content'][:4096]
+    notepad = Notepads.query.filter_by(chalid=chalid, teamid=teamid).first()
+    if notepad is None:
+        notepad = Notepads(teamid, chalid, content)
+    else:
+        notepad.content = content
+
+    db.session.add(notepad)
+    db.session.commit()
+    db.session.close()
+    return jsonify({'error': False})
+
+
+@challenges.route('/rate/<int:chalid>', methods=['POST'])
+def set_mark(chalid):
+    mark = int(request.form['mark'])
+    chalid = int(chalid)
+    solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+    if solve:
+        entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+        if not entry:
+            entry = Marks(session['id'], chalid, mark, '')
+        else:
+            entry = entry[0]
+            entry.mark = mark
+        db.session.add(entry)
+        db.session.commit()
+        db.session.close()
+        return jsonify({'error': False})
+    else:
+        return jsonify({'error': True, 'errstr': 'You have to solve this challenge before rating it.'})
+
+
+@challenges.route('/rate/<int:chalid>/feedback', methods=['POST'])
+def submit_feedback(chalid):
+    feedback = request.form['feedback'].strip()
+    solve = Solves.query.filter_by(chalid=chalid, teamid=session['id']).all()
+    if solve:
+        entry = Marks.query.filter_by(chalid=chalid, teamid=session['id']).all()
+        if not entry:
+            entry = Marks(session['id'], chalid, 3, feedback)
+        else:
+            entry = entry[0]
+            entry.feedback = feedback
+        db.session.add(entry)
+        db.session.commit()
+        db.session.close()
+        return jsonify({'error': False})
+    else:
+        return jsonify({'error': True, 'errstr': 'You have to solve this challenge before writing a feedback.'})

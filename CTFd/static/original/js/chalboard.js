@@ -59,6 +59,22 @@ function updateChalWindow(obj) {
     $('pre code').each(function(i, block) {
         hljs.highlightBlock(block);
     });
+    
+    $('#notepad-content').val(obj.notepad);
+    
+    if (obj.is_solved) {
+      $('#set_mark')[0].className = "show";
+      $("#rateYo").rateYo("option", "onSet", null);
+      if (obj.mark) {
+        $("#rateYo").rateYo("option", "rating", obj.mark);
+      } else {
+        $("#rateYo").rateYo("option", "rating", 3);
+      }
+      $("#rateYo").rateYo("option", "onSet", rate_chal);
+      $('#feedback').val(obj.feedback);
+    } else {
+      $('#set_mark')[0].className = "hidden";
+    }
 }
 
 $("#answer-input").keyup(function(event){
@@ -137,6 +153,13 @@ function marksolves(cb) {
         var solves = $.parseJSON(JSON.stringify(data));
         for (var i = solves['solves'].length - 1; i >= 0; i--) {
             var id = solves['solves'][i].chalid;
+            var obj = $.grep(challenges['game'], function (e) {
+                return e.id == id;
+            })[0];
+
+            obj.is_solved = true;
+            obj.mark      = solves['solves'][i].mark;
+            obj.feedback  = solves['solves'][i].feedback;
             $('button[value="' + id + '"]').removeClass('theme-background');
             $('button[value="' + id + '"]').addClass('solved-challenge');
         };
@@ -185,7 +208,8 @@ function loadchals() {
         $('#challenges-board').html("");
 
         for (var i = challenges['game'].length - 1; i >= 0; i--) {
-            challenges['game'][i].solves = 0
+            challenges['game'][i].solves = 0;
+            challenges['game'][i].is_solved = false;
             if ($.inArray(challenges['game'][i].category, categories) == -1) {
                 var category = challenges['game'][i].category;
                 categories.push(category);
@@ -258,6 +282,45 @@ $('#chal-window').on('hide.bs.modal', function (event) {
     $("#too-fast").slideUp();
 });
 
+function updatenotepad(e) {
+    var content   = $('#notepad-content').val();
+    var chalid    = $('#chal-id').val();
+    var nonce     = $('[name=nonce]').val();
+    var config    = {
+        url: script_root + '/chal/'+chalid+'/notepad',
+        method: 'POST',
+        dataType: 'json',
+        data: {content:content, nonce:nonce},
+        success: function(json) {
+          if (!json.error) {
+              $('#notepad-submit').html('Saved!');
+              $('#notepad-submit').removeClass('btn-default');
+              $('#notepad-submit').addClass('btn-success');
+              window.setTimeout(function() {
+                  $('#notepad-submit').html('Save');
+                  $('#notepad-submit').removeClass('btn-success');
+                  $('#notepad-submit').addClass('btn-default');
+              }, 500);
+          } else {
+              $('#notepad-submit').html('Error');
+              $('#notepad-submit').removeClass('btn-default');
+              $('#notepad-submit').addClass('btn-danger');
+              window.setTimeout(function() {
+                  $('#notepad-submit').html('Save');
+                  $('#notepad-submit').removeClass('btn-danger');
+                  $('#notepad-submit').addClass('btn-default');
+              }, 500);
+          }
+        }
+    };
+    $.ajax(config);
+}
+
+window.addEventListener('load', function() {
+  document.getElementById('notepad-submit').addEventListener('click', updatenotepad);
+  $('#submit_feedback')[0].addEventListener('submit', submit_feedback);
+});
+
 // $.distint(array)
 // Unique elements in array
 $.extend({
@@ -297,5 +360,88 @@ $('#chal-window').on('hidden.bs.modal', function() {
     $('.nav-tabs a:first').tab('show');
     history.replaceState('', document.title, window.location.pathname);
 });
+
+
+function rate_chal(rating, instance) {
+  var obj = $.grep(challenges['game'], function (e) {
+                return e.id == $('#chal-id').val();
+            })[0];
+  if (obj && obj.is_solved) {
+    try {
+      rating = parseInt(rating);
+    } catch (e) {
+      return;
+    }
+    if (rating > 5 || rating < 0) {
+      return;
+    }
+    console.log(rating);
+    var ajaxConfig = {
+      url: '/rate/'+obj.id,
+      method: 'POST',
+      data: {
+        mark: rating,
+        nonce: $('[name=nonce]').val()
+      },
+      dataType: 'json',
+      success: function(json) {
+        $('#rateOk').removeClass('hidden');
+        obj.mark  = rating;
+        window.setTimeout(function() {
+          $('#rateOk').addClass('hidden');
+        }, 1000);
+      }
+
+    };
+    $.ajax(ajaxConfig);
+  }
+}
+
+
+function submit_feedback(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var feedback, ajaxConfig;
+  feedback = e.target.elements.feedback.value.trim();
+  if (feedback == '') return;
+  var obj = $.grep(challenges['game'], function (e) {
+    return e.id == $('#chal-id').val();
+  })[0];
+  console.log(obj);
+  if (obj && obj.is_solved) {
+    ajaxConfig = {
+      url: '/rate/'+obj.id+'/feedback',
+      method: 'POST',
+      data: {
+        feedback: feedback,
+        nonce: $('[name=nonce]').val()
+      },
+      dataType: 'json',
+      success: function(json) {
+        if (!json.error) {
+          $('#submit_feedback_btn')[0].className = "btn btn-success btn-disabled";
+          $('#submit_feedback_btn')[0].disabled  = true;
+          $('#submit_feedback_btn')[0].innerHTML = 'Thanks!';
+          window.setTimeout(function() {
+            $('#submit_feedback_btn')[0].className  = "btn btn-success";
+            $('#submit_feedback_btn')[0].disabled   = false;
+            $('#submit_feedback_btn')[0].innerHTML  = 'Submit';
+          }, 1000);
+          obj.feedback  = feedback;
+        } else {
+          $('#submit_feedback_btn')[0].className  ="btn btn-danger btn-disabled";
+          $('#submit_feedback_btn')[0].disabled   = true;
+          $('#submit_feedback_btn')[0].innerHTML  = json.errstr;
+          window.setTimeout(function() {
+            $('#submit_feedback_btn')[0].className  = "btn btn-success";
+            $('#submit_feedback_btn')[0].disabled   = false;
+            $('#submit_feedback_btn')[0].innerHTML  = 'Submit';
+          }, 3000);
+        }
+      }
+    };
+    $.ajax(ajaxConfig);
+  }
+}
 
 setInterval(update, 60 * 1000); // update challenges every minute

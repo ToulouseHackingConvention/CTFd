@@ -376,4 +376,8 @@ table{
     margin: 0px;
 }
 
+#set_mark {
+  text-align: left;
+}
+
 /* END OF INPUT CSS */

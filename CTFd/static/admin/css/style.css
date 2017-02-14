@@ -479,6 +479,10 @@ table{
 .chal-button > .chal-percent{
     font-size: 12px;
 }
+.chal-button > .chal-average-marks {
+    font-size: 12px;
+    display: block;
+}
 
 .remove-key{
     float:right;
