@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from CTFd.utils import admins_only, is_admin, unix_time, get_config, \
     set_config, sendmail, rmdir, create_image, delete_image, run_image, container_status, container_ports, \
     container_stop, container_start, get_themes, cache
-from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Announcements, Config, Marks, DatabaseError, score_by_team, get_solves_and_value, Notepads
+from CTFd.models import db, Teams, Solves, Awards, Containers, Challenges, WrongKeys, Keys, Tags, Files, Tracking, Pages, Announcements, Config, Notepads, Marks, DatabaseError, score_by_team, get_solves_and_value
 from CTFd import countries
 
 admin = Blueprint('admin', __name__)
@@ -289,20 +289,20 @@ def admin_chals():
             Teams.banned == False).group_by(Solves.teamid).count()
 
         json_data = {'game': []}
-        all_notepads  = Notepads.query.join(Teams)
         for chal in chals:
             marks = Marks.query.join(Teams).filter(Marks.chalid == chal.id).all()
-            chal_notepads  = all_notepads.filter(Notepads.chalid == chal.id)
+            chal_notepads = Notepads.query.join(Teams).filter(Notepads.chalid == chal.id).all()
+
             feedbacks = []
-            notepads  = []
+            notepads = []
             average = 0
-            
+
             for n in chal_notepads:
-              notepads.append({
-                'teamid': n.teamid,
-                'teamname': n.team.name,
-                'content': n.content
-              })
+                notepads.append({
+                    'teamid': n.teamid,
+                    'teamname': n.team.name,
+                    'content': n.content
+                })
 
             for m in marks:
                 average += m.mark

@@ -58,7 +58,7 @@ def setup():
     <br/>
 
     <h6 class="text-center">
-        <a href="https://github.com/ToulouseHackingConvention/CTFd/">scoreboard</a> based on <a href="https://github.com/isislab/CTFd">CTFd</a> and modified by <a href="https://github.com/arthaud">maxima</a> and <a href="https://github.com/palkeo">palkeo</a>.
+        <a href="https://github.com/ToulouseHackingConvention/CTFd/">scoreboard</a> based on <a href="https://github.com/isislab/CTFd">CTFd</a> and modified by <a href="https://github.com/arthaud">maxima</a>, <a href="https://github.com/palkeo">palkeo</a> and <a href="https://github.com/zadlg">zadig</a>.
     </h6>""".format(request.script_root))
 
             # max attempts per challenge
