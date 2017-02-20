@@ -314,7 +314,7 @@ def admin_chals():
                 })
 
             if not marks:
-                average = 3
+                average = '-'
             else:
                 average = round(average / len(marks), 1)
 
