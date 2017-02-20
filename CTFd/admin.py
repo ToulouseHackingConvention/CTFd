@@ -573,7 +573,10 @@ def delete_team(teamid):
     try:
         WrongKeys.query.filter_by(teamid=teamid).delete()
         Solves.query.filter_by(teamid=teamid).delete()
+        Awards.query.filter_by(teamid=teamid).delete()
         Tracking.query.filter_by(team=teamid).delete()
+        Notepads.query.filter_by(teamid=teamid).delete()
+        Marks.query.filter_by(teamid=teamid).delete()
         Teams.query.filter_by(id=teamid).delete()
         db.session.commit()
         db.session.close()
@@ -843,14 +846,16 @@ def admin_create_chal():
 def admin_delete_chal():
     challenge = Challenges.query.filter_by(id=request.form['id']).first_or_404()
     Announcements.query.filter_by(chalid=challenge.id).delete()
+    Notepads.query.filter_by(chalid=challenge.id).delete()
+    Marks.query.filter_by(chalid=challenge.id).delete()
     WrongKeys.query.filter_by(chalid=challenge.id).delete()
     Solves.query.filter_by(chalid=challenge.id).delete()
     Keys.query.filter_by(chal=challenge.id).delete()
     files = Files.query.filter_by(chal=challenge.id).all()
-    Files.query.filter_by(chal=challenge.id).delete()
     for file in files:
         folder = os.path.dirname(os.path.join(os.path.normpath(app.root_path), 'uploads', file.location))
         rmdir(folder)
+    Files.query.filter_by(chal=challenge.id).delete()
     Tags.query.filter_by(chal=challenge.id).delete()
     Challenges.query.filter_by(id=challenge.id).delete()
     db.session.commit()
