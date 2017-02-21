@@ -61,7 +61,6 @@ function updateChalWindow(obj) {
     });
     
     $('#notepad-content').val(obj.notepad);
-    
     if (obj.is_solved) {
       $('#set_mark')[0].className = "show";
       $("#rateYo").rateYo("option", "onSet", null);
@@ -122,6 +121,14 @@ function submitkey(chal, key, nonce) {
             answer_input.val("");
             answer_input.removeClass("wrong");
             answer_input.addClass("correct");
+            marksolves();
+            updatesolves();
+            setTimeout(function(){
+            $('.alert').slideUp();
+            $('#submit-key').removeClass("disabled-button");
+            $('#submit-key').prop('disabled', false);
+        }, 3000);
+
         }
         else if (result.status == 2){ // Challenge already solved
             result_notification.addClass('alert alert-info alert-dismissable');
@@ -138,8 +145,6 @@ function submitkey(chal, key, nonce) {
                 answer_input.removeClass("too-fast");
             }, 3000);
         }
-        marksolves();
-        updatesolves();
         setTimeout(function(){
           $('.alert').slideUp();
           $('#submit-key').removeClass("disabled-button");
@@ -156,23 +161,26 @@ function marksolves(cb) {
             var obj = $.grep(challenges['game'], function (e) {
                 return e.id == id;
             })[0];
+            if (obj) {
+              obj.is_solved = true;
+              obj.mark      = 3;
+              if (('#'+obj.name) == document.location.hash) {
+                $('#set_mark')[0].className = "show";
+                $("#rateYo").rateYo("option", "onSet", null);
+                if (obj.mark) {
+                  $("#rateYo").rateYo("option", "rating", obj.mark);
+                } else {
+                  $("#rateYo").rateYo("option", "rating", 3);
+                }
+                $("#rateYo").rateYo("option", "onSet", rate_chal);
+                $('#feedback').val(obj.feedback);
 
-            obj.is_solved = true;
-            obj.mark      = 3;
-            $('#set_mark')[0].className = "show";
-            $("#rateYo").rateYo("option", "onSet", null);
-            if (obj.mark) {
-              $("#rateYo").rateYo("option", "rating", obj.mark);
-            } else {
-              $("#rateYo").rateYo("option", "rating", 3);
+                obj.mark      = solves['solves'][i].mark;
+                obj.feedback  = solves['solves'][i].feedback;
+              }
+              $('button[value="' + id + '"]').removeClass('theme-background');
+              $('button[value="' + id + '"]').addClass('solved-challenge');
             }
-            $("#rateYo").rateYo("option", "onSet", rate_chal);
-            $('#feedback').val(obj.feedback);
-
-            obj.mark      = solves['solves'][i].mark;
-            obj.feedback  = solves['solves'][i].feedback;
-            $('button[value="' + id + '"]').removeClass('theme-background');
-            $('button[value="' + id + '"]').addClass('solved-challenge');
         };
         if (cb) {
             cb();
@@ -390,7 +398,6 @@ function rate_chal(rating, instance) {
     if (rating > 5 || rating < 0) {
       return;
     }
-    console.log(rating);
     var ajaxConfig = {
       url: '/rate/'+obj.id,
       method: 'POST',
@@ -422,7 +429,6 @@ function submit_feedback(e) {
   var obj = $.grep(challenges['game'], function (e) {
     return e.id == $('#chal-id').val();
   })[0];
-  console.log(obj);
   if (obj && obj.is_solved) {
     ajaxConfig = {
       url: '/rate/'+obj.id+'/feedback',

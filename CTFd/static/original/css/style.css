@@ -378,6 +378,7 @@ table{
 
 #set_mark {
   text-align: left;
+  display: none;
 }
 
 #submit_feedback_btn {
