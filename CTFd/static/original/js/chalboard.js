@@ -70,7 +70,7 @@ function updateChalWindow(obj) {
         $("#rateYo").rateYo("option", "rating", 3);
       }
       $("#rateYo").rateYo("option", "onSet", rate_chal);
-      $('#feedback')[0].value = obj.feedback;
+      $('#feedback')[0].value = (obj.feedback)?obj.feedback:'';
     } else {
       $('#set_mark')[0].className = "hidden";
     }
@@ -173,7 +173,7 @@ function marksolves(cb) {
                   $("#rateYo").rateYo("option", "rating", 3);
                 }
                 $("#rateYo").rateYo("option", "onSet", rate_chal);
-                $('#feedback')[0].value = obj.feedback;
+                $('#feedback')[0].value = (obj.feedback)?obj.feedback:'';
 
                 obj.mark      = solves['solves'][i].mark;
                 obj.feedback  = solves['solves'][i].feedback;
