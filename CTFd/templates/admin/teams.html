@@ -265,7 +265,12 @@ $('.fa-pencil-square-o').click(function(){
     var email = elem.find('.team-email').text().trim();
     var website = elem.find('.team-website').text().trim();
     var affiliation = elem.find('.team-affiliation').text().trim();
-    var country = elem.find('.team-country img').attr('src').split('/').pop().substr(0, 2);
+    var country_src = elem.find('.team-country img').attr('src');
+    var country     = 'wo';
+    if (country_src) {
+      country = country_src.split('/').pop().substr(0, 2);
+    }
+      
 
     load_update_modal(id, name, email, website, affiliation, country);
 });
